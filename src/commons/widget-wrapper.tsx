@@ -6,7 +6,6 @@ import { SignSetFieldType } from "../models/views/signset.model";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { ManualSignReducerRootState } from "../pages/manual-sign-page/reducer";
 import { selectDeviceStateIsDesktop, selectDocumentDetailsSigners, selectDocumentDetailsSignsetList } from "../pages/manual-sign-page/reducer/selectors/documents-details.selector";
-import { debugLog } from '../utils/debug-logger';
 
 
 interface WidgetProps {
@@ -36,28 +35,12 @@ export const WidgetWrapper = ({ type, children, _key, handleChangeActiveWidget }
 
   const [{ isDragging }, drag, preview] = useDrag(
     () => ({
-      type: type,
+      type,
       item: { type },
       canDrag: isDesktop,
-      collect: (monitor) => {
-        const dragging = monitor.isDragging();
-        if (dragging) {
-          const clientOffset = monitor.getClientOffset();
-          const initialClientOffset = monitor.getInitialClientOffset();
-          
-          debugLog('🚀 [SIDEBAR DRAG START] Widget drag initiated from sidebar');
-          debugLog('  📦 Widget Type:', type);
-          debugLog('  🖥️ Is Desktop:', isDesktop);
-          debugLog('  👥 Signset List Length:', signsetList.length);
-          debugLog('  📍 Initial Position:', initialClientOffset);
-          debugLog('  🖱️ Current Position:', clientOffset);
-        }
-        return {
-          isDragging: dragging,
-        };
-      },
+      collect: (monitor) => ({ isDragging: monitor.isDragging() }),
     }),
-    [type, isDesktop, signsetList]
+    [type, isDesktop, signsetList],
   );
 
   useEffect(() => {
@@ -66,14 +49,14 @@ export const WidgetWrapper = ({ type, children, _key, handleChangeActiveWidget }
 
 
   return (
-    <Wrapper ref={!isDesktop || signsetList.length === 0 ? undefined : drag} key={_key} onClick={(event) => {
-      if (signsetList.length !== 0) {
-        debugLog('👆 [SIDEBAR CLICK] Widget clicked for click-to-place mode');
-        debugLog('  📦 Widget Type:', type);
-        debugLog('  🖥️ Is Desktop:', isDesktop);
-        handleChangeActiveWidget(type);
-      }
-    }} signsetList={signsetList}>
+    <Wrapper
+      ref={!isDesktop || signsetList.length === 0 ? undefined : drag}
+      key={_key}
+      onClick={() => {
+        if (signsetList.length !== 0) handleChangeActiveWidget(type);
+      }}
+      signsetList={signsetList}
+    >
       {children}
     </Wrapper>
   );

@@ -43,51 +43,33 @@ import { ResultDocPage } from "../../commons/result-doc-page";
 import { documentsDetailsActions } from "../../pages/manual-sign-page/reducer/slices/documents-details.slice";
 import ContextMenu from "./ContextMenu";
 import { useTranslation } from "react-i18next";
-import { debugLog } from '../../utils/debug-logger';
+import { clampToPage, toUnscaledPagePoint } from "../../utils/widget-position";
+import { useLatestRef } from "../../utils/use-latest-ref";
+import { usePageRefs } from "./page-refs-context";
 
 
-/**
- * Represents the properties of a DocWrapper, extending the Scalable interface.
- * @interface
- */
 interface DocWrapperProps extends Scalable {
   isLoadError: boolean;
 }
 
-/**
- * Represents the properties of a PageWrapper, extending the Scalable interface.
- * @interface
- */
 interface PageWrapper extends Scalable { }
 
-/**
- * Represents the properties of a StyledPage, extending the Scalable interface.
- * @interface
- */
 interface StyledPage extends Scalable {
   isRenderLoading: boolean;
 }
 
-/**
- * Represents the properties of a DocWorkboardPanel.
- * @interface
- */
 interface DocWorkboardPanelProps {
   selectedPageNumber: number;
   totalPageNumber: number;
   setSelectedPageNumber: (pageNumber: number) => void;
-  setPageWrapperRef: any;
   pageLayoutRef: any;
   selectedDocumentId: any;
 }
-
-
 
 export const DocWorkboardPanel = ({
   selectedPageNumber,
   totalPageNumber,
   setSelectedPageNumber,
-  setPageWrapperRef,
   pageLayoutRef,
 }: DocWorkboardPanelProps) => {
   const [showAllWidgets, setShowAllWidgets] = useState<any[]>([]);
@@ -95,7 +77,7 @@ export const DocWorkboardPanel = ({
   const [renderLoading, setRenderLoading] = useState(false);
   const [isLoadError, setIsLoadError] = useState(false);
   const [pageOrientation, setPageOrientation] = useState<string>("");
-  const pageWrapperRef = useRef<any[]>([])
+  const pageWrapperRef = usePageRefs();
   const docWrapperRef = useRef<any>(null);
   const dispatch = useDispatch<StoreDispatch>();
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -120,11 +102,10 @@ export const DocWorkboardPanel = ({
   };
 
 
-  // need to be removed
   const scale = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsScale(state));
-  // Keep a ref in sync with the latest scale so async drop handlers never read a stale value
-  const scaleRef = useRef(scale);
-  useEffect(() => { scaleRef.current = scale; }, [scale]);
+  // react-dnd retains the previous drop closure for one render after deps change,
+  // so we read scale through a ref that always tracks the latest value.
+  const scaleRef = useLatestRef(scale);
   const isThumbnailClicked = useSelector((state: ManualSignReducerRootState) => selectIsThumbnailClicked(state));
   const selectedDocumentId = useSelector((state: ManualSignReducerRootState) => selectSignsetsDetailsSelectedDocumentId(state));
   const signerEmail = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignerEmail(state));
@@ -232,154 +213,43 @@ export const DocWorkboardPanel = ({
       pageNumber = selectedPageNumber;
     }
 
-    const boudingClient = pageWrapperRef?.current[pageNumber]?.getBoundingClientRect();
-    var widgetListData = [];
+    const pageRect = pageWrapperRef.current[pageNumber]?.getBoundingClientRect();
+    if (!pageRect) return;
 
-    // Calculate the new left and top values
-    let left = Math.round(event.clientX - boudingClient.left) * (1 / scale);
-    let top = Math.round(event.clientY - boudingClient.top) * (1 / scale);
-
-    widgetListData.push({
-      id: 1,
-      type: signSetFieldType.sign,
-      name: t("Signature"),
-      icon: SignSetFieldTypeIcon.sign,
-      action: () => {
-        debugLog('🎯 [CONTEXT MENU - SIGNATURE] Starting position calculation');
-        debugLog('  📍 Page Number:', pageNumber);
-        debugLog('  📏 Scale:', scale);
-        debugLog('  🔢 Raw Position:', { left, top });
-        debugLog('  📦 Bounding Client:', {
-          width: boudingClient.width,
-          height: boudingClient.height
-        });
-
-        // Calculate the right and bottom limits in UNSCALED page coords
-        const rightLimit = boudingClient.width / scale - SignSetDimensionValues[signSetFieldType.sign].width;
-        const bottomLimit = boudingClient.height / scale - SignSetDimensionValues[signSetFieldType.sign]?.height;
-
-        debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
-
-        // Ensure the item stays within the boundingClient
-        left = Math.max(0, Math.min(left, rightLimit));
-        top = Math.max(0, Math.min(top, bottomLimit));
-
-        debugLog('  ✅ Final Position:', { left, top });
-
-        setAddOneSignsetDetails({
-          left,
-          top,
-          fieldType: signSetFieldType.sign,
-          pageIndex: pageNumber,
-          isDesktop: isDesktop,
-          isThumbnailClicked: isThumbnailClicked,
-          signerEmail: signerEmail,
-          contextItemExist: contextItemExist,
-        });
-      }
-    },
-      {
-        id: 2,
-        type: signSetFieldType.seal,
-        name: t("Seal"),
-        icon: SignSetFieldTypeIcon.seal,
-        action: () => {
-          debugLog('🎯 [CONTEXT MENU - SEAL] Starting position calculation');
-          debugLog('  📍 Page Number:', pageNumber);
-          debugLog('  📏 Scale:', scale);
-          debugLog('  🔢 Raw Position:', { left, top });
-
-          const rightLimit = boudingClient.width / scale - SignSetDimensionValues[signSetFieldType.seal].width;
-          const bottomLimit = boudingClient.height / scale - SignSetDimensionValues[signSetFieldType.seal]?.height;
-
-          debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
-
-          left = Math.max(0, Math.min(left, rightLimit));
-          top = Math.max(0, Math.min(top, bottomLimit));
-
-          debugLog('  ✅ Final Position:', { left, top });
-
-          setAddOneSignsetDetails({
-            left,
-            top,
-            fieldType: signSetFieldType.seal,
-            pageIndex: pageNumber,
-            isDesktop: isDesktop,
-            isThumbnailClicked: isThumbnailClicked,
-            signerEmail: signerEmail,
-            contextItemExist: contextItemExist,
-          });
-        }
-      },
-      {
-        id: 3,
-        type: signSetFieldType.signdate,
-        name: t("Sign Date"),
-        icon: SignSetFieldTypeIcon.signdate,
-        action: () => {
-          debugLog('🎯 [CONTEXT MENU - SIGN DATE] Starting position calculation');
-          debugLog('  📍 Page Number:', pageNumber);
-          debugLog('  📏 Scale:', scale);
-          debugLog('  🔢 Raw Position:', { left, top });
-
-          const rightLimit = boudingClient.width / scale - SignSetDimensionValues[signSetFieldType.signdate].width;
-          const bottomLimit = boudingClient.height / scale - SignSetDimensionValues[signSetFieldType.signdate]?.height;
-
-          debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
-
-          left = Math.max(0, Math.min(left, rightLimit));
-          top = Math.max(0, Math.min(top, bottomLimit));
-
-          debugLog('  ✅ Final Position:', { left, top });
-
-          setAddOneSignsetDetails({
-            left,
-            top,
-            fieldType: signSetFieldType.signdate,
-            pageIndex: pageNumber,
-            isDesktop: isDesktop,
-            isThumbnailClicked: isThumbnailClicked,
-            signerEmail: signerEmail,
-            contextItemExist: contextItemExist,
-          });
-        }
-      },
-      {
-        id: 4,
-        type: signSetFieldType.textfield,
-        name: t("Text Field"),
-        icon: SignSetFieldTypeIcon.textfield,
-        action: () => {
-          debugLog('🎯 [CONTEXT MENU - TEXT FIELD] Starting position calculation');
-          debugLog('  📍 Page Number:', pageNumber);
-          debugLog('  📏 Scale:', scale);
-          debugLog('  🔢 Raw Position:', { left, top });
-
-          const rightLimit = boudingClient.width / scale - SignSetDimensionValues[signSetFieldType.textfield].width;
-          const bottomLimit = boudingClient.height / scale - SignSetDimensionValues[signSetFieldType.textfield]?.height;
-
-          debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
-
-          left = Math.max(0, Math.min(left, rightLimit));
-          top = Math.max(0, Math.min(top, bottomLimit));
-
-          debugLog('  ✅ Final Position:', { left, top });
-
-          setAddOneSignsetDetails({
-            left,
-            top,
-            fieldType: signSetFieldType.textfield,
-            pageIndex: pageNumber,
-            isDesktop: isDesktop,
-            isThumbnailClicked: isThumbnailClicked,
-            signerEmail: signerEmail,
-            contextItemExist: contextItemExist,
-          });
-        }
-      }
+    const rawPoint = toUnscaledPagePoint(
+      { x: event.clientX, y: event.clientY },
+      pageRect,
+      scale,
     );
 
-    setContextMenuItems(widgetListData);
+    const placeAt = (fieldType: SignSetFieldType) => {
+      const { left, top } = clampToPage(
+        rawPoint,
+        pageRect,
+        scale,
+        SignSetDimensionValues[fieldType],
+      );
+
+      setAddOneSignsetDetails({
+        left,
+        top,
+        fieldType,
+        pageIndex: pageNumber,
+        isDesktop,
+        isThumbnailClicked,
+        signerEmail,
+        contextItemExist,
+      });
+    };
+
+    const menuItems = [
+      { id: 1, type: signSetFieldType.sign, name: t("Signature"), icon: SignSetFieldTypeIcon.sign },
+      { id: 2, type: signSetFieldType.seal, name: t("Seal"), icon: SignSetFieldTypeIcon.seal },
+      { id: 3, type: signSetFieldType.signdate, name: t("Sign Date"), icon: SignSetFieldTypeIcon.signdate },
+      { id: 4, type: signSetFieldType.textfield, name: t("Text Field"), icon: SignSetFieldTypeIcon.textfield },
+    ].map((item) => ({ ...item, action: () => placeAt(item.type) }));
+
+    setContextMenuItems(menuItems);
   };
 
   const setupIntersectionObserver = () => {
@@ -435,104 +305,41 @@ export const DocWorkboardPanel = ({
     dispatch(signsetsDetailsActions.unselectSelectedSignsetId(""));
   };
 
-  /* will re-render when selectedPageNumber & scale state changed: */
   const [_, dropping] = useDrop(
     () => ({
       accept: SignSetFieldTypeArray,
-      hover: (item: { type: SignSetFieldType }, monitor) => {
-        // Track position in real-time during drag
-        const clientOffset = monitor.getClientOffset();
-        const initialOffset = monitor.getInitialClientOffset();
-        const boudingClient = pageWrapperRef?.current[selectedPageNumber]?.getBoundingClientRect();
-
-        if (clientOffset && initialOffset && boudingClient) {
-          const currentX = clientOffset.x;
-          const currentY = clientOffset.y;
-          
-          // Calculate position relative to page
-          const relativeX = Math.round(currentX - boudingClient.left);
-          const relativeY = Math.round(currentY - boudingClient.top);
-          
-          // Calculate unscaled position (what will be saved)
-          const unscaledX = relativeX * (1 / scale);
-          const unscaledY = relativeY * (1 / scale);
-
-          debugLog('🔄 [SIDEBAR DRAG HOVER] Real-time position tracking');
-          debugLog('  📍 Selected Page:', selectedPageNumber);
-          debugLog('  🖱️ Current Mouse Position:', { x: currentX, y: currentY });
-          debugLog('  📦 Page Bounds:', { left: boudingClient.left, top: boudingClient.top });
-          debugLog('  📊 Position Relative to Page:', { x: relativeX, y: relativeY });
-          debugLog('  📏 Scale:', scale);
-          debugLog('  💾 Unscaled Position (will be saved):', { x: unscaledX, y: unscaledY });
-        }
-      },
       drop: (item: { type: SignSetFieldType }, monitor) => {
-        // Always read the latest scale — avoids stale-closure bug when user zooms then drops before re-render
         const currentScale = scaleRef.current;
-        const delta = monitor.getDifferenceFromInitialOffset();
-        const boudingClient = pageWrapperRef?.current[selectedPageNumber]?.getBoundingClientRect();
         const offset = monitor.getInitialClientOffset();
-        let dimensionValue = { width: 0, height: 0 };
+        const delta = monitor.getDifferenceFromInitialOffset();
+        const pageRect = pageWrapperRef?.current[selectedPageNumber]?.getBoundingClientRect();
+        if (!offset || !delta || !pageRect) return;
 
-        debugLog('🎯 [SIDEBAR DRAG DROP] Starting position calculation');
-        debugLog('  📍 Selected Page:', selectedPageNumber);
-        debugLog('  📏 Scale (ref):', currentScale, '(closure):', scale);
-        debugLog('  📦 Item Type:', item.type);
+        const rawPoint = toUnscaledPagePoint(
+          { x: offset.x + delta.x, y: offset.y + delta.y },
+          pageRect,
+          currentScale,
+        );
+        const { left, top } = clampToPage(
+          rawPoint,
+          pageRect,
+          currentScale,
+          SignSetDimensionValues[item.type],
+        );
 
-        /* left & top upload back to redux store with given scale */
-        if (delta && offset && boudingClient) {
-          debugLog('  🔢 Raw Values:');
-          debugLog('    - Initial Offset:', { x: offset.x, y: offset.y });
-          debugLog('    - Delta:', { x: delta.x, y: delta.y });
-          debugLog('    - Bounding Client:', {
-            left: boudingClient.left,
-            top: boudingClient.top,
-            width: boudingClient.width,
-            height: boudingClient.height
-          });
-
-          // Calculate the new left and top values
-          let left = Math.round(offset.x - boudingClient.left + delta.x) * (1 / currentScale);
-          let top = Math.round(offset.y - boudingClient.top + delta.y) * (1 / currentScale);
-
-          debugLog('  🧮 Calculated Position (before constraints):');
-          debugLog('    - Left:', left);
-          debugLog('    - Top:', top);
-
-          dimensionValue = SignSetDimensionValues[item.type];
-          debugLog('  📐 Widget Dimensions:', dimensionValue);
-
-          // Calculate the right and bottom limits in UNSCALED page coords
-          const rightLimit = boudingClient.width / currentScale - dimensionValue?.width;
-          const bottomLimit = boudingClient.height / currentScale - dimensionValue?.height;
-
-          debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
-
-          // Ensure the item stays within the boundingClient
-          left = Math.max(0, Math.min(left, rightLimit));
-          top = Math.max(0, Math.min(top, bottomLimit));
-
-          debugLog('  ✅ Final Position (after constraints):');
-          debugLog('    - Left:', left);
-          debugLog('    - Top:', top);
-
-          // this one need to move as props
-          setAddOneSignsetDetails({
-            left,
-            top,
-            fieldType: item.type,
-            pageIndex: selectedPageNumber,
-            isDesktop: isDesktop,
-            isThumbnailClicked: isThumbnailClicked,
-            signerEmail: signerEmail,
-            contextItemExist: contextItemExist,
-          });
-        } else {
-          debugLog('  ❌ Missing required data:', { delta: !!delta, offset: !!offset, boudingClient: !!boudingClient });
-        }
-      }
+        setAddOneSignsetDetails({
+          left,
+          top,
+          fieldType: item.type,
+          pageIndex: selectedPageNumber,
+          isDesktop,
+          isThumbnailClicked,
+          signerEmail,
+          contextItemExist,
+        });
+      },
     }),
-    [selectedPageNumber, scale, currPageDetails, signerEmail]
+    [selectedPageNumber, scale, currPageDetails, signerEmail],
   );
 
   const setAddOneSignsetDetails = ({
@@ -577,44 +384,21 @@ export const DocWorkboardPanel = ({
     setRenderLoading(false);
   };
 
-  /**
-   * Handles the drag enter event and updates the selected page number and relevant state variables.
-   * @param {Event} event - The drag enter event object.
-   */
   const handleDragEnter = (event: any) => {
-    //Extract the page number from the parent element's data attribute.
-    const pageNumber = parseInt(event.target.parentElement.getAttribute('data-page-number'));
-
-    /**
-     * If the extracted number is valid:
-     * Set the selected drag page number when a valid page number is obtained.
-     * Update the pageWrapperRef for the selected page number.
-     * Set the selected page number to the new value.
-     * @type {number}
-     */
-    // event.currentTarget is the <PageWrapper> itself (the single page).
-    // Using .parentElement here would point at the multi-page container, causing
-    // bounding-rect math to use the entire document instead of one page.
+    const pageNumber = parseInt(event.target.parentElement.getAttribute("data-page-number"));
+    // currentTarget is the single <PageWrapper>; using parentElement would point at
+    // the container holding all pages and break bounding-rect math.
     const pageEl = event.currentTarget;
 
     if (!isNaN(pageNumber)) {
       setSelectedDragPageNumber(pageNumber);
       pageWrapperRef.current[pageNumber] = pageEl;
       setSelectedPageNumber(pageNumber);
-    }
-    /**
-     * If the extracted page number is not valid: 
-     * Fall back to the current selected drag page number.
-     * Update the selected page number accordingly.
-     */
-    else {
+    } else {
       pageWrapperRef.current[selectedDragPageNumber] = pageEl;
       setSelectedPageNumber(selectedDragPageNumber);
     }
 
-    /**
-     * Attach the dnd drop target to the single page element.
-     */
     dropping(pageEl);
     dispatch(documentsDetailsActions.setIsThumbnailClicked(false));
   }
@@ -629,99 +413,33 @@ export const DocWorkboardPanel = ({
         //pageNumber = parseInt(event.target.parentElement.offsetParent.className.split(":")[1]);
         pageNumber = selectedPageNumber;
       }
-      //const boudingClient = pageWrapperRef?.current[selectedPageNumber]?.getBoundingClientRect();
-      const boudingClient = pageWrapperRef?.current[pageNumber]?.getBoundingClientRect();
-      let dimensionValue = { width: 0, height: 0 };
+      const pageRect = pageWrapperRef.current[pageNumber]?.getBoundingClientRect();
 
-      if (event.type === 'touchstart') {
-        if (selectedClickedWidget !== "") {
-          debugLog('🎯 [CLICK TO PLACE - TOUCH] Starting position calculation');
-          debugLog('  📍 Page Number:', pageNumber);
-          debugLog('  📏 Scale:', scale);
-          debugLog('  🎨 Widget Type:', selectedClickedWidget);
+      if (selectedClickedWidget !== "" && pageRect) {
+        const cursor = event.type === "touchstart"
+          ? { x: event.touches[0].pageX, y: event.touches[0].pageY }
+          : { x: event.pageX, y: event.pageY };
+        const fieldType = selectedClickedWidget.split("-")[0] as SignSetFieldType;
 
-          // Calculate the new left and top values
-          let left = Math.round(event.touches[0].pageX - boudingClient.left) * (1 / scale);
-          let top = Math.round(event.touches[0].pageY - boudingClient.top) * (1 / scale);
-          let fieldType = selectedClickedWidget.split("-")[0];
+        const rawPoint = toUnscaledPagePoint(cursor, pageRect, scale);
+        const { left, top } = clampToPage(
+          rawPoint,
+          pageRect,
+          scale,
+          (SignSetDimensionValues as any)[fieldType],
+        );
 
-          debugLog('  🔢 Touch Position:', { pageX: event.touches[0].pageX, pageY: event.touches[0].pageY });
-          debugLog('  📦 Bounding Client:', { left: boudingClient.left, top: boudingClient.top });
-          debugLog('  🧮 Calculated Position (before constraints):', { left, top });
-
-          dimensionValue = (SignSetDimensionValues as any)[fieldType];
-          debugLog('  📐 Widget Dimensions:', dimensionValue);
-
-          // Calculate the right and bottom limits in UNSCALED page coords
-          const rightLimit = boudingClient.width / scale - dimensionValue?.width;
-          const bottomLimit = boudingClient.height / scale - dimensionValue?.height;
-
-          debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
-
-          // Ensure the item stays within the boundingClient
-          left = Math.max(0, Math.min(left, rightLimit));
-          top = Math.max(0, Math.min(top, bottomLimit));
-
-          debugLog('  ✅ Final Position:', { left, top });
-
-          setAddOneSignsetDetails({
-            left,
-            top,
-            fieldType,
-            //pageIndex: selectedPageNumber,
-            pageIndex: pageNumber,
-            isDesktop: isDesktop,
-            isThumbnailClicked: isThumbnailClicked,
-            signerEmail: signerEmail,
-            contextItemExist: contextItemExist,
-          });
-          dispatch(signsetsDetailsActions.setSelectedClickedWidget(""));
-        }
-      }
-      else {
-        if (selectedClickedWidget !== "") {
-          debugLog('🎯 [CLICK TO PLACE - MOUSE] Starting position calculation');
-          debugLog('  📍 Page Number:', pageNumber);
-          debugLog('  📏 Scale:', scale);
-          debugLog('  🎨 Widget Type:', selectedClickedWidget);
-
-          // Calculate the new left and top values
-          let left = Math.round(event.pageX - boudingClient.left) * (1 / scale);
-          let top = Math.round(event.pageY - boudingClient.top) * (1 / scale);
-          let fieldType = selectedClickedWidget.split("-")[0];
-
-          debugLog('  🔢 Mouse Position:', { pageX: event.pageX, pageY: event.pageY });
-          debugLog('  📦 Bounding Client:', { left: boudingClient.left, top: boudingClient.top, width: boudingClient.width, height: boudingClient.height });
-          debugLog('  🧮 Calculated Position (before constraints):', { left, top });
-
-          dimensionValue = (SignSetDimensionValues as any)[fieldType];
-          debugLog('  📐 Widget Dimensions:', dimensionValue);
-
-          // Calculate the right and bottom limits in UNSCALED page coords
-          const rightLimit = boudingClient.width / scale - dimensionValue?.width;
-          const bottomLimit = boudingClient.height / scale - dimensionValue?.height;
-
-          debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
-
-          // Ensure the item stays within the boundingClient
-          left = Math.max(0, Math.min(left, rightLimit));
-          top = Math.max(0, Math.min(top, bottomLimit));
-
-          debugLog('  ✅ Final Position:', { left, top });
-
-          setAddOneSignsetDetails({
-            left,
-            top,
-            fieldType,
-            //pageIndex: selectedPageNumber,
-            pageIndex: pageNumber,
-            isDesktop: isDesktop,
-            isThumbnailClicked: isThumbnailClicked,
-            signerEmail: signerEmail,
-            contextItemExist: contextItemExist,
-          });
-          dispatch(signsetsDetailsActions.setSelectedClickedWidget(""));
-        }
+        setAddOneSignsetDetails({
+          left,
+          top,
+          fieldType,
+          pageIndex: pageNumber,
+          isDesktop,
+          isThumbnailClicked,
+          signerEmail,
+          contextItemExist,
+        });
+        dispatch(signsetsDetailsActions.setSelectedClickedWidget(""));
       }
 
       setSelectedPageNumber(pageNumber);
@@ -730,31 +448,18 @@ export const DocWorkboardPanel = ({
     }
   }
 
-  /**
-   * A useEffect hook that scrolls the document wrapper to the selected page when the selected page number changes.
-   * This hook is triggered when the 'selectedPageNumber' state changes and ensures that the document wrapper is scrolled to the 
-   * selected page's position for a smooth user experience.
-   * @param {number} scale - The scale factor, typically representing zoom level.
-   * @param {number} selectedPageNumber - The selected page number.
-   * @param {Object} pageWrapperRef - Reference to the page wrapper element.
-   * @param {Object} pageLayoutRef - Reference to the page layout element.
-   * @listens selectedPageNumber
-   */
+  // Scroll the doc wrapper to the selected page when the user picks a thumbnail.
   useEffect(() => {
     if (docWrapperRef.current && isThumbnailClicked) {
       let pageOffsetTop;
 
-      /**
-       * Calculate the page's offset top position based on the scale factor.
-       * If the scale factor is greater than or equal to 1, the page's offset top is obtained directly.
-       * If the scale factor is less than 1, an adjustment is made by subtracting the offset of the page layout.
-       */
-      if (scale >= 1) {
-        pageOffsetTop = pageWrapperRef.current[selectedPageNumber].offsetTop; // Get the height of the selected page
-      }
-      else {
-        pageOffsetTop = pageWrapperRef.current[selectedPageNumber].offsetTop - (pageLayoutRef.current.offsetTop);
-      }
+      // At scales below 1 the page sits inside an additional layout offset
+      // we need to subtract; at >= 1 the page's own offsetTop is correct.
+      const pageEl = pageWrapperRef.current[selectedPageNumber];
+      if (!pageEl) return;
+      pageOffsetTop = scale >= 1
+        ? pageEl.offsetTop
+        : pageEl.offsetTop - pageLayoutRef.current.offsetTop;
 
       docWrapperRef.current.scrollTo({
         top: pageOffsetTop,
@@ -835,8 +540,7 @@ export const DocWorkboardPanel = ({
   }, [allWidgets])
 
   const onSetDisableWidget = (email: string, disableWidget: boolean) => {
-    //debugLog("email: ", email, "disableWidget: ", disableWidget);
-    
+    // currently a no-op; the DraggableWrapper still expects this callback prop.
   }
 
 
@@ -885,9 +589,8 @@ export const DocWorkboardPanel = ({
                 onTouchStart={handlePageClick}
                 data-page-number={pageNumber}
                 data-page-orientation={pageOrientation}
-                ref={(event) => {
-                  pageWrapperRef.current[pageNumber] = event;
-                  setPageWrapperRef(pageWrapperRef);
+                ref={(el) => {
+                  pageWrapperRef.current[pageNumber] = el;
                 }}
                 onContextMenu={handleContextMenu}
                 scale={scale}
@@ -912,7 +615,6 @@ export const DocWorkboardPanel = ({
                         id={ids.id}
                         key={ids.id}
                         pageIndex={pageNumber}
-                        pageWrapperRef={pageWrapperRef}
                         resizableStyleCreator={resizableStyleCreator}
                         disableWidget={signerEmail !== ids.signerEmail}
                         onSetAllWidgets={onSetAllWidgets}
