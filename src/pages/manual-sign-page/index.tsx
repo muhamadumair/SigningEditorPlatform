@@ -23,14 +23,13 @@ import {
 import { MSPSidebar } from "./layouts/msp-sidebar";
 import { useTranslation } from "react-i18next";
 import { Scalable } from "../../models/views/generic.model";
-import { DragPositionTracker } from "../../commons/drag-position-tracker";
+import { PageRefsProvider } from "../../layouts/doc-workboard/page-refs-context";
 
 interface DocSiteLayout extends Scalable { }
 
 export const ManualSignPage = () => {
   const dispatch = useDispatch<StoreDispatch>();
   const pageLayoutRef = useRef<any>(null);
-  const [pageWrapperRef, setPageWrapperRef] = useState<any[]>([])
 
   const { t } = useTranslation(["common"]);
 
@@ -122,7 +121,7 @@ export const ManualSignPage = () => {
 
   return (
     <DndProviderWrapper>
-      <DragPositionTracker />
+     <PageRefsProvider>
       <MainLayout>
         <MSPSidebar />
         <DocSiteLayout scale={scale}>
@@ -141,7 +140,6 @@ export const ManualSignPage = () => {
                 totalPageNumber={totalPageNumber}
                 selectedPageNumber={selectedPageNumber}
                 setSelectedPageNumber={setPaginationSelectedPageNumber}
-                setPageWrapperRef={setPageWrapperRef}
                 pageLayoutRef={pageLayoutRef}
                 selectedDocumentId={selectedDocumentId}
               />
@@ -154,6 +152,7 @@ export const ManualSignPage = () => {
           </DocBodyLayout>
         </DocSiteLayout>
       </MainLayout>
+     </PageRefsProvider>
     </DndProviderWrapper>
 
   )

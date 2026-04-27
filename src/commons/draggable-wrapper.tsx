@@ -41,14 +41,13 @@ import { TextFieldModal } from "../components/text-field-modal";
 import { CircleDeleteButton } from "./circle-delete-button";
 import { MSPDocWorkboardWidget } from "../pages/manual-sign-page/components/msp-doc-workboard-widget";
 import { Resizable } from "re-resizable";
-import { debugLog } from '../utils/debug-logger';
+import { usePageRefs } from "../layouts/doc-workboard/page-refs-context";
 import { Button } from "antd";
 import { DeleteFilled } from "@ant-design/icons";
 
 interface DraggableWrapper {
   id: any;
   pageIndex: number;
-  pageWrapperRef: any;
   resizableStyleCreator: React.CSSProperties;
   disableWidget: boolean;
   onSetAllWidgets: (theAllWidgets: any) => void;
@@ -88,8 +87,9 @@ interface ChildWrapperProps extends Scalable, IsSelectedWidgetProps {
  *
  */
 
-export const DraggableWrapper = ({ id, pageIndex, pageWrapperRef, resizableStyleCreator, disableWidget, onSetAllWidgets, onSetDisableWidget }: DraggableWrapper) => {
+export const DraggableWrapper = ({ id, pageIndex, resizableStyleCreator, disableWidget, onSetAllWidgets, onSetDisableWidget }: DraggableWrapper) => {
   const dispatch = useDispatch<StoreDispatch>();
+  const pageWrapperRef = usePageRefs();
 
   const signerEmail = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignerEmail(state));
 
@@ -167,29 +167,13 @@ export const DraggableWrapper = ({ id, pageIndex, pageWrapperRef, resizableStyle
     const { x, y } = position;
     let newX = x + data.deltaX;
 
-    debugLog('🔄 [WITHIN-PAGE DRAG] Widget being dragged');
-    debugLog('  🆔 Widget ID:', id);
-    debugLog('  📍 Page Index:', pageIndex);
-    debugLog('  📏 Scale:', scale);
-    debugLog('  📊 Current Position:', { x, y });
-    debugLog('  ↔️ Delta:', { deltaX: data.deltaX, deltaY: data.deltaY });
-
-    // Get page and widget dimensions
-    const draggableHeight = size.height;
-    const draggableWidth = size.width;
-    const pageRect = pageWrapperRef.current[pageIndex].getBoundingClientRect();
-    // pageRect is already scaled (it's the rendered DOM size). Don't multiply by scale again.
-    const pageHeight = pageRect.height;
-    const pageWidth = pageRect.width;
-
-    debugLog('  📐 Widget Size:', { width: size.width, height: size.height });
-    debugLog('  📄 Page Dimensions:', { width: pageWidth, height: pageHeight });
-
-    // Calculate max positions (widget must stay fully inside page)
-    const maxY = pageHeight - (draggableHeight || 0);
-    const maxX = pageWidth - (draggableWidth || 0);
-
-    debugLog('  🚧 Max Positions:', { maxX, maxY });
+    // pageRect from getBoundingClientRect is already scaled; size state is also stored
+    // in scaled pixels, so no extra scale conversion is needed here.
+    const pageEl = pageWrapperRef.current[pageIndex];
+    if (!pageEl) return;
+    const pageRect = pageEl.getBoundingClientRect();
+    const maxX = pageRect.width - (size.width || 0);
+    const maxY = pageRect.height - (size.height || 0);
 
     if (window.TouchEvent && e instanceof TouchEvent) {
       const { touches } = e as TouchEvent;
@@ -207,11 +191,6 @@ export const DraggableWrapper = ({ id, pageIndex, pageWrapperRef, resizableStyle
         newX = Math.min(Math.max(newX, 0), maxX);
         newY = Math.min(Math.max(newY, 0), maxY);
 
-        debugLog('  📱 Touch - New Position (after constraints):', { x: newX, y: newY });
-
-        //findOverlap(newX, newY, draggableWidth, draggableHeight, widgetList);
-
-        // Update the position state with the constrained values
         setPosition({
           x: newX,
           y: newY,
@@ -232,10 +211,6 @@ export const DraggableWrapper = ({ id, pageIndex, pageWrapperRef, resizableStyle
       // Constrain both X and Y within the valid range
       newX = Math.min(Math.max(newX, 0), maxX);
       newY = Math.min(Math.max(newY, 0), maxY);
-
-      debugLog('  🖱️ Mouse - New Position (after constraints):', { x: newX, y: newY });
-
-      //findOverlap(newX, newY, draggableWidth, draggableHeight, widgetList);
 
       setPosition({
         x: newX,
@@ -409,13 +384,7 @@ export const DraggableWrapper = ({ id, pageIndex, pageWrapperRef, resizableStyle
     e.stopPropagation();
     setPrevTouchY(null); // Reset the previous touch Y position after dragging ends
 
-    debugLog('🛑 [WITHIN-PAGE DRAG STOP] Drag ended');
-    debugLog('  🆔 Widget ID:', id);
-    debugLog('  📍 Page Index:', pageIndex);
-    debugLog('  📏 Scale:', scale);
-    debugLog('  📊 Final Position (scaled):', position);
-
-    // the updated field on redux store is always in scale of 1: 
+    // Redux always stores positions in unscaled (scale 1) coordinates.
     const updatedFields = {
       top: position.y / scale,
       left: position.x / scale,
@@ -426,22 +395,14 @@ export const DraggableWrapper = ({ id, pageIndex, pageWrapperRef, resizableStyle
       left: initialPosition.x,
     };
 
-    debugLog('  🔄 Position Conversion:');
-    debugLog('    - Scaled Position:', position);
-    debugLog('    - Unscaled Position (saved to Redux):', updatedFields);
-    debugLog('    - Initial Position:', initialFields);
-
-    /* only dispatch an action if initial fields not the same as updated fileds */
+    // Only dispatch when the position actually changed.
     if (JSON.stringify(initialFields) !== JSON.stringify(updatedFields)) {
-      debugLog('  ✅ Position changed - Updating Redux');
       dispatch(
         signsetsDetailsActions.updateOneSignsetDetails({
           id: id,
           updatedFields: updatedFields,
         })
       );
-    } else {
-      debugLog('  ⏭️ Position unchanged - Skipping Redux update');
     }
   };
 
