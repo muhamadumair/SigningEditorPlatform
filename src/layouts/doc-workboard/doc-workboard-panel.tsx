@@ -251,9 +251,9 @@ export const DocWorkboardPanel = ({
           height: boudingClient.height
         });
 
-        // Calculate the right and bottom limits based on item dimensions
-        const rightLimit = boudingClient.width - SignSetDimensionValues[signSetFieldType.sign].width;
-        const bottomLimit = boudingClient.height - SignSetDimensionValues[signSetFieldType.sign]?.height;
+        // Calculate the right and bottom limits in UNSCALED page coords
+        const rightLimit = boudingClient.width / scale - SignSetDimensionValues[signSetFieldType.sign].width;
+        const bottomLimit = boudingClient.height / scale - SignSetDimensionValues[signSetFieldType.sign]?.height;
 
         debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
 
@@ -286,8 +286,8 @@ export const DocWorkboardPanel = ({
           debugLog('  📏 Scale:', scale);
           debugLog('  🔢 Raw Position:', { left, top });
 
-          const rightLimit = boudingClient.width - SignSetDimensionValues[signSetFieldType.seal].width;
-          const bottomLimit = boudingClient.height - SignSetDimensionValues[signSetFieldType.seal]?.height;
+          const rightLimit = boudingClient.width / scale - SignSetDimensionValues[signSetFieldType.seal].width;
+          const bottomLimit = boudingClient.height / scale - SignSetDimensionValues[signSetFieldType.seal]?.height;
 
           debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
 
@@ -319,8 +319,8 @@ export const DocWorkboardPanel = ({
           debugLog('  📏 Scale:', scale);
           debugLog('  🔢 Raw Position:', { left, top });
 
-          const rightLimit = boudingClient.width - SignSetDimensionValues[signSetFieldType.signdate].width;
-          const bottomLimit = boudingClient.height - SignSetDimensionValues[signSetFieldType.signdate]?.height;
+          const rightLimit = boudingClient.width / scale - SignSetDimensionValues[signSetFieldType.signdate].width;
+          const bottomLimit = boudingClient.height / scale - SignSetDimensionValues[signSetFieldType.signdate]?.height;
 
           debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
 
@@ -352,8 +352,8 @@ export const DocWorkboardPanel = ({
           debugLog('  📏 Scale:', scale);
           debugLog('  🔢 Raw Position:', { left, top });
 
-          const rightLimit = boudingClient.width - SignSetDimensionValues[signSetFieldType.textfield].width;
-          const bottomLimit = boudingClient.height - SignSetDimensionValues[signSetFieldType.textfield]?.height;
+          const rightLimit = boudingClient.width / scale - SignSetDimensionValues[signSetFieldType.textfield].width;
+          const bottomLimit = boudingClient.height / scale - SignSetDimensionValues[signSetFieldType.textfield]?.height;
 
           debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
 
@@ -497,9 +497,9 @@ export const DocWorkboardPanel = ({
           dimensionValue = SignSetDimensionValues[item.type];
           debugLog('  📐 Widget Dimensions:', dimensionValue);
 
-          // Calculate the right and bottom limits based on item dimensions
-          const rightLimit = boudingClient.width - dimensionValue?.width;
-          const bottomLimit = boudingClient.height - dimensionValue?.height;
+          // Calculate the right and bottom limits in UNSCALED page coords
+          const rightLimit = boudingClient.width / scale - dimensionValue?.width;
+          const bottomLimit = boudingClient.height / scale - dimensionValue?.height;
 
           debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
 
@@ -643,9 +643,9 @@ export const DocWorkboardPanel = ({
           dimensionValue = (SignSetDimensionValues as any)[fieldType];
           debugLog('  📐 Widget Dimensions:', dimensionValue);
 
-          // Calculate the right and bottom limits based on item dimensions
-          const rightLimit = boudingClient.width - dimensionValue?.width;
-          const bottomLimit = boudingClient.height - dimensionValue?.height;
+          // Calculate the right and bottom limits in UNSCALED page coords
+          const rightLimit = boudingClient.width / scale - dimensionValue?.width;
+          const bottomLimit = boudingClient.height / scale - dimensionValue?.height;
 
           debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
 
@@ -688,9 +688,9 @@ export const DocWorkboardPanel = ({
           dimensionValue = (SignSetDimensionValues as any)[fieldType];
           debugLog('  📐 Widget Dimensions:', dimensionValue);
 
-          // Calculate the right and bottom limits based on item dimensions
-          const rightLimit = boudingClient.width - dimensionValue?.width;
-          const bottomLimit = boudingClient.height - dimensionValue?.height;
+          // Calculate the right and bottom limits in UNSCALED page coords
+          const rightLimit = boudingClient.width / scale - dimensionValue?.width;
+          const bottomLimit = boudingClient.height / scale - dimensionValue?.height;
 
           debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
 

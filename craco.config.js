@@ -6,13 +6,13 @@ module.exports = {
   webpack: {
     configure: (webpackConfig, { env, paths }) => {
       // Determine the filename based on the condition
-      const jsFilename = "static/js/signingcloud-editor.js";
+      const jsFilename = "static/js/editor.js";
 
       // Update the output filename in webpack configuration
       webpackConfig.output.filename = jsFilename;
 
       // You can also update the CSS filename here if needed
-      const cssFilename = "static/css/signingcloud-editor.css";
+      const cssFilename = "static/css/editor.css";
 
       // Find the plugin responsible for CSS and update the filename
       const cssPluginIndex = webpackConfig.plugins.findIndex(
@@ -36,7 +36,7 @@ module.exports = {
               },
               output: {
                 comments: false, // Remove comments
-                preamble: "/* Copyright (c) 2023 SigningCloud Sdn. Bhd. */", // Optional preamble
+                // preamble: "", // Optional preamble
                 // You can add more output options as needed
               },
               mangle: {

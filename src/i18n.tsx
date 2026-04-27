@@ -9,9 +9,8 @@ i18n
   .use(initReactI18next)
   .init({
     backend: {
-      // translation file path
-      //loadPath: `/editor/assets/i18n/{{ns}}/{{lng}}.json`, // for local test environment
-      loadPath: `./signingcloud-editor/editor/assets/i18n/{{ns}}/{{lng}}.json`,
+      // translation file path; resolves under PUBLIC_URL for both dev and sub-path deploys.
+      loadPath: `${process.env.PUBLIC_URL || ''}/editor/assets/i18n/{{ns}}/{{lng}}.json`,
     },
     fallbackLng: "en",
     // should be disabled in production

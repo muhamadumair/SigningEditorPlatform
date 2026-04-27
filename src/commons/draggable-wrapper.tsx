@@ -178,8 +178,9 @@ export const DraggableWrapper = ({ id, pageIndex, pageWrapperRef, resizableStyle
     const draggableHeight = size.height;
     const draggableWidth = size.width;
     const pageRect = pageWrapperRef.current[pageIndex].getBoundingClientRect();
-    const pageHeight = pageRect.height * scale;
-    const pageWidth = pageRect.width * scale;
+    // pageRect is already scaled (it's the rendered DOM size). Don't multiply by scale again.
+    const pageHeight = pageRect.height;
+    const pageWidth = pageRect.width;
 
     debugLog('  📐 Widget Size:', { width: size.width, height: size.height });
     debugLog('  📄 Page Dimensions:', { width: pageWidth, height: pageHeight });

@@ -4,8 +4,8 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
  * target need to be changed upon production
  */
 const signServerProxy = {
-  target: "https://demo.signingcloud.com:9443",
-  //target: "http://localhost:5005",
+  // Set the target to your sign-server backend (e.g. via env var or config).
+  target: process.env.REACT_APP_SIGN_SERVER_URL || "http://localhost:5005",
   changeOrigin: true,
   onProxyReq: (proxReq, req, res) => {
     proxReq.removeHeader("referer");

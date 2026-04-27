@@ -1,4 +1,5 @@
 import { Button, ButtonProps } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 import styled from "styled-components";
 import { Scalable } from "../models/views/generic.model";
 import { DISABLE_TRANSITION, RED, WHITE } from "../styles/style.constant";
@@ -57,7 +58,7 @@ export const CircleDeleteButton = ({
     <DeleteButton
       scale={scale}
       isselectedwidget={isselectedwidget ? 1 : 0}
-      icon={<img src="./signingcloud-editor/media/deleteCloseIcon.png" style={{ width: iconSize * scale }}/>}
+      icon={<CloseOutlined style={{ fontSize: iconSize * scale }} />}
       type={type}
       onClick={onClick}
       right={right}

@@ -11,8 +11,7 @@ import {
 import { PageDetailsConfig } from "../pages/manual-sign-page/reducer/slices/pages-details.slice";
 
 /**
- * REACT DOCUMENT CREATOR D&D LIBRARY:
- * convert from redux store signsets into signset parameter as according to https://docs.signingcloud.com/?docs=api-reference/upload-document 
+ * Convert redux-store signsets into the signset payload format.
  * @param signsets
  */
 export const reactLibraryFormatter = ({

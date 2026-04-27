@@ -1,5 +1,5 @@
 {
-  "name": "signingcloud-doc-editor",
+  "name": "signing-editor-platform",
   "version": "0.1.0",
   "private": true,
   "main": "./dist/cjs/index.js",
@@ -9,7 +9,7 @@
     "dist"
   ],
   "license": "MIT",
-  "author": "Signing Cloud Sdn Bhd",
+  "author": "",
   "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
