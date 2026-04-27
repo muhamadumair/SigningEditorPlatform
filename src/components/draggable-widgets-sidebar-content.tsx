@@ -17,7 +17,7 @@ import { SidebarListTitle } from "./sidebar-list-title";
 import { ScTooltip } from "../commons/sc-tooltip";
 import { Collapsable, ActivatedWidget } from "../models/views/generic.model";
 import { useTranslation } from "react-i18next";
-import { useEffect, useRef, useState } from "react";
+import { MouseEvent, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { StoreDispatch } from "../store";
 import { ManualSignReducerRootState } from "../pages/manual-sign-page/reducer";
@@ -269,37 +269,52 @@ export const DraggableWidgetsSidebarContent = ({
           tooltipDescription={"Choose the signer to set the attributes"}
         />
         {collapsed ?
-          <Select
-            defaultValue={signsetList && signsetList.length > 0 ? signsetList[0].email : currentSignerList[0]?.value}
-            style={{ width: collapsed ? 60 : 180, fontSize: 14, marginLeft: 10, color: "black" }}
-            options={currentSignerList}
-            onChange={handleChangeSigner}
-            dropdownStyle={{ minWidth: collapsed ? 280 : 180 }}
-          />
-          :
-          <>
-            <div style={{
-              width: currentSignerList.length > 4 ? 220 : 215,
-              paddingLeft: 8, paddingTop: 10
-            }}>
-              <div style={{ border: "1px groove" }}>
-                <Radio.Group
-                  style={{ overflowY: currentSignerList.length > 4 ? "scroll" : "hidden", maxHeight: 250 }}
-                  ref={signerListRef}
-                  value={signerEmail}
-                >
-                  {currentSignerList.map((signer) => (
-                    <Radio.Button
-                      value={signer.value}
-                      onChange={handleChangeSigner}
-                      key={signer.value}
+          <CollapsedSigners>
+            {currentSignerList.length === 0 ? (
+              <CollapsedEmpty title="No signers yet">—</CollapsedEmpty>
+            ) : (
+              currentSignerList.map((signer) => {
+                const selected = signerEmail === signer.value;
+                const initial = (signer.value || "?").charAt(0).toUpperCase();
+                return (
+                  <Tooltip key={signer.value} title={signer.label} placement="right" color={MAINBLUE}>
+                    <CollapsedAvatar
+                      $selected={selected}
+                      onClick={() => dispatch(documentsDetailsActions.setSignerEmail(signer.value))}
                     >
-                      <div className="long-text-button">{signer.label}</div>
-                      <Button
-                        icon={<DeleteTwoTone twoToneColor="red" />}
-                        style={{ border: "none", background: "transparent" }}
-                        className="delete-button"
-                        onClick={() => {
+                      {initial}
+                    </CollapsedAvatar>
+                  </Tooltip>
+                );
+              })
+            )}
+          </CollapsedSigners>
+          :
+          <SignersPanel>
+            {currentSignerList.length === 0 && !addSigner && (
+              <EmptyHint>No signers yet. Add one to get started.</EmptyHint>
+            )}
+
+            {currentSignerList.length > 0 && (
+              <SignersList ref={signerListRef} $scroll={currentSignerList.length > 4}>
+                {currentSignerList.map((signer) => {
+                  const selected = signerEmail === signer.value;
+                  const initial = (signer.value || "?").charAt(0).toUpperCase();
+                  return (
+                    <SignerRow
+                      key={signer.value}
+                      $selected={selected}
+                      onClick={() => dispatch(documentsDetailsActions.setSignerEmail(signer.value))}
+                    >
+                      <SignerAvatar $selected={selected}>{initial}</SignerAvatar>
+                      <SignerEmail title={signer.value}>{signer.label}</SignerEmail>
+                      <DeleteIconBtn
+                        type="text"
+                        size="small"
+                        icon={<DeleteTwoTone twoToneColor="#ff4d4f" />}
+                        aria-label="Remove signer"
+                        onClick={(e: MouseEvent<HTMLElement>) => {
+                          e.stopPropagation();
                           const updatedSignerList = currentSignerList.filter((userEmail) => userEmail.value !== signer.value);
                           const changeSignsetListFormat = signsetList.filter((signsetItem: any) => signsetItem?.email !== signer.value);
                           const updatedSignsetList = allSignsetDetails.filter((signsetItem) => signsetItem?.signerEmail !== signer.value);
@@ -309,64 +324,77 @@ export const DraggableWidgetsSidebarContent = ({
                           dispatch(signsetsDetailsActions.setInitialSignsetsDetails(updatedSignsetList));
                         }}
                       />
-                    </Radio.Button>
-                  ))}
-                </Radio.Group>
-                {addSigner && currentSignerList.length < 10 &&
-                  <Space.Compact style={{ width: '100%' }}>
-                    <Input
-                      placeholder="Email"
-                      value={email}
-                      onChange={handleEmailChange}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' && email !== "") { handleAddSigner(); }
-                        if (event.key === 'Delete') {
-                          setAddSigner(false);
-                          setIsDuplicateEmail(false);
-                          setIsValidEmail(true);
-                        }
-                      }}
-                    />
-                    <Button
-                      icon={<CheckCircleTwoTone twoToneColor="#52c41a" />}
-                      style={{ border: "1px groove" }}
-                      onClick={handleAddSigner}
-                    />
-                    <Button
-                      icon={<CloseCircleTwoTone
-                        twoToneColor="#eb2f96" />}
-                      style={{ border: "1px groove", cursor: currentSignerList.length !== 0 ? "pointer" : "default" }}
-                      disabled={currentSignerList.length === 0 ? true : false}
-                      onClick={() => {
-                        setAddSigner(false);
-                        setIsDuplicateEmail(false);
-                        setIsValidEmail(true);
-                      }} />
-                  </Space.Compact>
+                    </SignerRow>
+                  );
+                })}
+              </SignersList>
+            )}
 
-                }
-              </div>
-              {isDuplicateEmail && <div style={{ color: "red", paddingTop: 5, textAlign: "start" }}>Please enter a unique email</div>}
-              {!isValidEmail && <div style={{ color: "red", paddingTop: 5, textAlign: "start" }}>Please enter a valid email address</div>}
-              {showMessage && <div style={{ color: "red", paddingTop: 5, textAlign: "start" }}>Maximum 10 signers accepted</div>}
-              <div style={{ paddingTop: 5, textAlign: "end" }}>
-                <Button
-                  icon={<PlusOutlined />}
-                  style={{ border: "none" }}
-                  onClick={() => {
-                    if (currentSignerList.length === 10) {
+            {addSigner && currentSignerList.length < 10 && (
+              <AddForm>
+                <Input
+                  autoFocus
+                  size="small"
+                  placeholder="signer@example.com"
+                  value={email}
+                  onChange={handleEmailChange}
+                  status={(!isValidEmail || isDuplicateEmail) ? "error" : undefined}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' && email !== "") { handleAddSigner(); }
+                    if (event.key === 'Escape') {
                       setAddSigner(false);
-                      setShowMessage(true);
+                      setIsDuplicateEmail(false);
+                      setIsValidEmail(true);
                     }
-                    else {
-                      setAddSigner(true);
-                    }
-                    setEmail("");
-                  }} />
-              </div>
-            </div>
+                  }}
+                />
+                <FormActions>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setAddSigner(false);
+                      setIsDuplicateEmail(false);
+                      setIsValidEmail(true);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="small"
+                    type="primary"
+                    disabled={!email}
+                    onClick={handleAddSigner}
+                  >
+                    Add
+                  </Button>
+                </FormActions>
+              </AddForm>
+            )}
 
-          </>
+            {!isValidEmail && <ErrorMsg>Please enter a valid email address.</ErrorMsg>}
+            {isDuplicateEmail && <ErrorMsg>This signer has already been added.</ErrorMsg>}
+            {showMessage && <ErrorMsg>Maximum 10 signers allowed.</ErrorMsg>}
+
+            {!addSigner && (
+              <AddSignerCTA
+                type="dashed"
+                icon={<PlusOutlined />}
+                block
+                disabled={currentSignerList.length >= 10}
+                onClick={() => {
+                  if (currentSignerList.length === 10) {
+                    setAddSigner(false);
+                    setShowMessage(true);
+                  } else {
+                    setAddSigner(true);
+                  }
+                  setEmail("");
+                }}
+              >
+                Add signer
+              </AddSignerCTA>
+            )}
+          </SignersPanel>
 
         }
       </>
@@ -540,4 +568,155 @@ border-top: 1px groove;
     border: none;
     background: transparent;
   }
+`;
+
+/* ---------- Signers panel (redesigned) ---------- */
+
+const SignersPanel = styled.div`
+  padding: 8px 4px 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const EmptyHint = styled.div`
+  font-size: 12px;
+  color: #8c8c8c;
+  padding: 8px 4px;
+  text-align: center;
+  background: #fafafa;
+  border-radius: 6px;
+`;
+
+const SignersList = styled.div<{ $scroll: boolean }>`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: ${(p) => (p.$scroll ? "240px" : "none")};
+  overflow-y: ${(p) => (p.$scroll ? "auto" : "visible")};
+  padding-right: ${(p) => (p.$scroll ? "4px" : "0")};
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 3px; }
+`;
+
+const SignerRow = styled.div<{ $selected: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  border: 1px solid transparent;
+  background: ${(p) => (p.$selected ? LIGHTBLUE : "transparent")};
+  border-color: ${(p) => (p.$selected ? MAINBLUE : "transparent")};
+
+  &:hover {
+    background: ${(p) => (p.$selected ? LIGHTBLUE : "#f5f7fa")};
+  }
+
+  &:hover button.signer-delete {
+    opacity: 1;
+  }
+`;
+
+const SignerAvatar = styled.div<{ $selected: boolean }>`
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: ${(p) => (p.$selected ? MAINBLUE : "#bfbfbf")};
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+`;
+
+const SignerEmail = styled.div`
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: ${BLACK};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const DeleteIconBtn = styled(Button).attrs({ className: "signer-delete" })`
+  flex: 0 0 auto;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+
+  &:focus,
+  &:focus-visible { opacity: 1; }
+`;
+
+const AddForm = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 6px;
+`;
+
+const FormActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+`;
+
+const ErrorMsg = styled.div`
+  font-size: 12px;
+  color: #ff4d4f;
+  padding: 0 4px;
+`;
+
+const AddSignerCTA = styled(Button)`
+  margin-top: 4px;
+`;
+
+const CollapsedSigners = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  max-height: 320px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 2px; }
+`;
+
+const CollapsedAvatar = styled.div<{ $selected: boolean }>`
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: ${(p) => (p.$selected ? MAINBLUE : "#bfbfbf")};
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-transform: uppercase;
+  border: 2px solid ${(p) => (p.$selected ? MAINBLUE : "transparent")};
+  box-shadow: ${(p) => (p.$selected ? "0 0 0 2px #fff inset" : "none")};
+  transition: transform 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    transform: scale(1.08);
+    background: ${(p) => (p.$selected ? MAINBLUE : "#8c8c8c")};
+  }
+`;
+
+const CollapsedEmpty = styled.div`
+  font-size: 12px;
+  color: #bfbfbf;
+  padding: 6px 0;
 `;
