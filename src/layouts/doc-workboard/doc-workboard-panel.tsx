@@ -122,6 +122,9 @@ export const DocWorkboardPanel = ({
 
   // need to be removed
   const scale = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsScale(state));
+  // Keep a ref in sync with the latest scale so async drop handlers never read a stale value
+  const scaleRef = useRef(scale);
+  useEffect(() => { scaleRef.current = scale; }, [scale]);
   const isThumbnailClicked = useSelector((state: ManualSignReducerRootState) => selectIsThumbnailClicked(state));
   const selectedDocumentId = useSelector((state: ManualSignReducerRootState) => selectSignsetsDetailsSelectedDocumentId(state));
   const signerEmail = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignerEmail(state));
@@ -464,6 +467,8 @@ export const DocWorkboardPanel = ({
         }
       },
       drop: (item: { type: SignSetFieldType }, monitor) => {
+        // Always read the latest scale — avoids stale-closure bug when user zooms then drops before re-render
+        const currentScale = scaleRef.current;
         const delta = monitor.getDifferenceFromInitialOffset();
         const boudingClient = pageWrapperRef?.current[selectedPageNumber]?.getBoundingClientRect();
         const offset = monitor.getInitialClientOffset();
@@ -471,7 +476,7 @@ export const DocWorkboardPanel = ({
 
         debugLog('🎯 [SIDEBAR DRAG DROP] Starting position calculation');
         debugLog('  📍 Selected Page:', selectedPageNumber);
-        debugLog('  📏 Scale:', scale);
+        debugLog('  📏 Scale (ref):', currentScale, '(closure):', scale);
         debugLog('  📦 Item Type:', item.type);
 
         /* left & top upload back to redux store with given scale */
@@ -487,8 +492,8 @@ export const DocWorkboardPanel = ({
           });
 
           // Calculate the new left and top values
-          let left = Math.round(offset.x - boudingClient.left + delta.x) * (1 / scale);
-          let top = Math.round(offset.y - boudingClient.top + delta.y) * (1 / scale);
+          let left = Math.round(offset.x - boudingClient.left + delta.x) * (1 / currentScale);
+          let top = Math.round(offset.y - boudingClient.top + delta.y) * (1 / currentScale);
 
           debugLog('  🧮 Calculated Position (before constraints):');
           debugLog('    - Left:', left);
@@ -498,8 +503,8 @@ export const DocWorkboardPanel = ({
           debugLog('  📐 Widget Dimensions:', dimensionValue);
 
           // Calculate the right and bottom limits in UNSCALED page coords
-          const rightLimit = boudingClient.width / scale - dimensionValue?.width;
-          const bottomLimit = boudingClient.height / scale - dimensionValue?.height;
+          const rightLimit = boudingClient.width / currentScale - dimensionValue?.width;
+          const bottomLimit = boudingClient.height / currentScale - dimensionValue?.height;
 
           debugLog('  🚧 Limits:', { rightLimit, bottomLimit });
 
@@ -587,9 +592,14 @@ export const DocWorkboardPanel = ({
      * Set the selected page number to the new value.
      * @type {number}
      */
+    // event.currentTarget is the <PageWrapper> itself (the single page).
+    // Using .parentElement here would point at the multi-page container, causing
+    // bounding-rect math to use the entire document instead of one page.
+    const pageEl = event.currentTarget;
+
     if (!isNaN(pageNumber)) {
       setSelectedDragPageNumber(pageNumber);
-      pageWrapperRef.current[pageNumber] = event.currentTarget.parentElement;
+      pageWrapperRef.current[pageNumber] = pageEl;
       setSelectedPageNumber(pageNumber);
     }
     /**
@@ -598,15 +608,14 @@ export const DocWorkboardPanel = ({
      * Update the selected page number accordingly.
      */
     else {
-      pageWrapperRef.current[selectedDragPageNumber] = event.currentTarget.parentElement;
+      pageWrapperRef.current[selectedDragPageNumber] = pageEl;
       setSelectedPageNumber(selectedDragPageNumber);
     }
 
     /**
-     * Call the 'dropping' function with the current parent element.
-     * Dispatch an action to set 'isThumbnailClicked' to 'false'.
+     * Attach the dnd drop target to the single page element.
      */
-    dropping(event.currentTarget.parentElement);
+    dropping(pageEl);
     dispatch(documentsDetailsActions.setIsThumbnailClicked(false));
   }
 
