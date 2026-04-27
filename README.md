@@ -1,68 +1,100 @@
+# Signing Editor Platform
 
+A React + TypeScript web editor for placing signature, seal, date and text-field widgets on PDF documents. Widgets are draggable, resizable, and persisted in a Redux store ready to be submitted to a signing backend.
 
+## Features
 
-# Getting Started with Create React App
+- Render multi-page PDFs with [`react-pdf`](https://github.com/wojtekmaj/react-pdf) and zoom in/out
+- Drag-and-drop widgets from a sidebar onto any page (`react-dnd`) or right-click for a context menu
+- Move and resize placed widgets within page bounds (`react-draggable`, `re-resizable`)
+- Per-signer widget assignment with avatar list, validation and delete actions
+- Redux Toolkit store with undo/redo (`redux-undo`)
+- Internationalization (`i18next`) with on-demand JSON loading
+- Ant Design components and `styled-components` theming
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Tech stack
 
-# Project Structure
+React 18 - TypeScript - Redux Toolkit - Ant Design - styled-components - react-pdf - react-dnd - react-draggable - re-resizable - i18next - CRA + CRACO
 
-Commons:\
-Common is a generic & highly flexible html division which provides multiple react props for components to be configured.
+## Getting started
 
-Components:\
-Component is common with configured react props.
+### Prerequisites
 
-Layouts:\
-Layout is a html division made up with multiple components.
+- Node.js 16+ and npm 8+
 
-Pages:\
-Page is a html division made up with multiple layouts.
+### Install
 
-# File Naming
+```bash
+npm install --legacy-peer-deps
+```
 
-html division ends with wrapper denotes that it provides a child props to be configured.
+> The `--legacy-peer-deps` flag is required because of strict peer ranges between `react-pdf` 5.x and React 18.
 
-## Available Scripts
+### Run in development
 
-In the project directory, you can run:
+```bash
+npm start
+```
 
-### `npm start`
+The app runs on [http://localhost:3000](http://localhost:3000).
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Build
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+| Script | Output |
+| --- | --- |
+| `npm run build` | Standalone web app (uses `env/.envCommon`) |
+| `npm run build:library` | Library bundle for embedding (uses `env/.envLibrary`) |
+| `npm run build:debug` | Standalone build with `REACT_APP_DEBUG_MODE=true` |
+| `npm run compile` | Generates ESM + CJS type-safe library output to `dist/` |
 
-### `npm test`
+Build artifacts are emitted to `build/` (`static/js/editor.js`, `static/css/editor.css`).
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Configuration
 
-### `npm run build`
+Sign-server requests are proxied in development through `src/setupProxy.js`. Override the upstream by exporting an env var before `npm start`:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+# PowerShell
+$env:REACT_APP_SIGN_SERVER_URL = "http://localhost:5005"
+npm start
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Without it, the proxy defaults to `http://localhost:5005`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Project structure
 
-### `npm run eject`
+```
+src/
+  commons/          Reusable, prop-driven primitives (e.g. DraggableWrapper)
+  components/       Composed UI built on top of commons (e.g. sidebar widgets)
+  layouts/          Multi-component sections (e.g. doc workboard)
+  pages/            Top-level routes assembled from layouts
+  models/           TypeScript types and view-models
+  styles/           Theme constants and shared style tokens
+  utils/            Pure helpers (formatters, geometry, etc.)
+  pages/manual-sign-page/reducer/   Redux slices, selectors, and root reducer
+  i18n.tsx          i18next setup
+  setupProxy.js     CRA dev proxy
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Naming conventions
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Files ending in `*-wrapper.tsx` accept `children` and forward configuration props.
+- Redux slices live under `pages/<page>/reducer/slices/` with matching selectors next to them.
+- Styled components are colocated with the component that uses them.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Scripts
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+| Script | Description |
+| --- | --- |
+| `npm start` | Run the dev server |
+| `npm run start:debug` | Dev server with `REACT_APP_DEBUG_MODE=true` |
+| `npm test` | Run tests in watch mode |
+| `npm run build` | Production build of the standalone app |
+| `npm run build:library` | Production build for embedding |
+| `npm run compile` | Build distributable ESM + CJS library |
+| `npm run clean:all` | Remove `dist/`, `build/`, and `node_modules/` |
 
-## Learn More
+## License
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
->>>>>>> da3ae62 (Initialize project using Create React App)
+[MIT](./LICENSE)
