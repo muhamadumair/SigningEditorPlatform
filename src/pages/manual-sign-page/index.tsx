@@ -11,15 +11,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { StoreDispatch } from "../../store";
 import { ManualSignReducerRootState } from "./reducer";
 import {
-  selectDocumentDetailsTotalPageNumberByDocId,
   selectDeviceStateIsDesktop,
-  selectDocumentDetailsScale
+  selectDocumentDetailsScale,
 } from "./reducer/selectors/documents-details.selector";
-import { signsetsDetailsActions } from "./reducer/slices/signsets-details.slice";
-import {
-  selectSignsetsDetailsSelectedDocumentId,
-  selectSignsetsDetailsSelectedPageNumber,
-} from "./reducer/selectors/signsets-details.selector";
 import { MSPSidebar } from "./layouts/msp-sidebar";
 import { useTranslation } from "react-i18next";
 import { Scalable } from "../../models/views/generic.model";
@@ -82,19 +76,6 @@ export const ManualSignPage = () => {
     selectDocumentDetailsScale(state)
   );
 
-  const selectedPageNumber = useSelector((state: ManualSignReducerRootState) =>
-    selectSignsetsDetailsSelectedPageNumber(state)
-  );
-
-  const selectedDocumentId = useSelector((state: ManualSignReducerRootState) =>
-    selectSignsetsDetailsSelectedDocumentId(state)
-  );
-
-  const totalPageNumber = useSelector(
-    (state: ManualSignReducerRootState) =>
-      selectDocumentDetailsTotalPageNumberByDocId(state, selectedDocumentId)!
-  );
-
   const isDesktop = useSelector((state: ManualSignReducerRootState) =>
     selectDeviceStateIsDesktop(state)
   );
@@ -111,13 +92,6 @@ export const ManualSignPage = () => {
       setThumbnailCollapse(false);
     }
   }, [isDesktop]);
-
-  /**
-   * functions:
-   */
-  const setPaginationSelectedPageNumber = (pageNumber: number) => {
-    dispatch(signsetsDetailsActions.setSelectedPageNumber(pageNumber));
-  };
 
   return (
     <DndProviderWrapper>
@@ -136,13 +110,7 @@ export const ManualSignPage = () => {
           </Affix>
           <DocBodyLayout>
             <PageLayout ref={pageLayoutRef}>
-              <DocWorkboardPanel
-                totalPageNumber={totalPageNumber}
-                selectedPageNumber={selectedPageNumber}
-                setSelectedPageNumber={setPaginationSelectedPageNumber}
-                pageLayoutRef={pageLayoutRef}
-                selectedDocumentId={selectedDocumentId}
-              />
+              <DocWorkboardPanel pageLayoutRef={pageLayoutRef} />
             </PageLayout>
             <DocThumbnailSider
               showSiderFixed={!isDesktop ? false : true}

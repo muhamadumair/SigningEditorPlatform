@@ -20,6 +20,7 @@ import { addSignsetDetailsStateFromView } from "../../utils/manual-sign-doc.util
 import {
   selectAllSignsetIdsByPageNumAndDocId,
   selectSignsetsDetailsSelectedDocumentId,
+  selectSignsetsDetailsSelectedPageNumber,
   selectClickedWidget,
   selectAllSignsetDetails,
 } from "../../pages/manual-sign-page/reducer/selectors/signsets-details.selector";
@@ -28,6 +29,7 @@ import {
   selectDeviceStateIsDesktop,
   selectDocumentDetailsFileBlobByDocId,
   selectDocumentDetailsScale,
+  selectDocumentDetailsTotalPageNumberByDocId,
   selectIsThumbnailClicked,
   selectDocumentDetailsSignerEmail,
   selectDocumentDetailsSigners,
@@ -59,17 +61,10 @@ interface StyledPage extends Scalable {
 }
 
 interface DocWorkboardPanelProps {
-  selectedPageNumber: number;
-  totalPageNumber: number;
-  setSelectedPageNumber: (pageNumber: number) => void;
   pageLayoutRef: any;
-  selectedDocumentId: any;
 }
 
 export const DocWorkboardPanel = ({
-  selectedPageNumber,
-  totalPageNumber,
-  setSelectedPageNumber,
   pageLayoutRef,
 }: DocWorkboardPanelProps) => {
   const [showAllWidgets, setShowAllWidgets] = useState<any[]>([]);
@@ -108,6 +103,11 @@ export const DocWorkboardPanel = ({
   const scaleRef = useLatestRef(scale);
   const isThumbnailClicked = useSelector((state: ManualSignReducerRootState) => selectIsThumbnailClicked(state));
   const selectedDocumentId = useSelector((state: ManualSignReducerRootState) => selectSignsetsDetailsSelectedDocumentId(state));
+  const selectedPageNumber = useSelector((state: ManualSignReducerRootState) => selectSignsetsDetailsSelectedPageNumber(state));
+  const totalPageNumber = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsTotalPageNumberByDocId(state, selectedDocumentId)!);
+  const setSelectedPageNumber = (pageNumber: number) => {
+    dispatch(signsetsDetailsActions.setSelectedPageNumber(pageNumber));
+  };
   const signerEmail = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignerEmail(state));
   const currPageDetails = useSelector((state: ManualSignReducerRootState) =>
     selectPagesDetailsByDocIdAndPageNumber(

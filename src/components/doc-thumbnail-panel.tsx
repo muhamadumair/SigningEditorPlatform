@@ -16,6 +16,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { ManualSignReducerRootState } from "../pages/manual-sign-page/reducer";
 import {
   selectAllSignsetDetails,
+  selectSignsetsDetailsSelectedDocumentId,
+  selectSignsetsDetailsSelectedPageNumber,
 } from "../pages/manual-sign-page/reducer/selectors/signsets-details.selector";
 import { StoreDispatch } from "../store";
 import {
@@ -39,17 +41,19 @@ interface DocumentWrapperProps {
 
 interface DocThumbnailPanelProps {
   documentId: string;
-  selectedDocumentId: string;
-  selectedPageNumber: number;
   thumbnailWrapperRef: any;
 }
 
 export const DocThumbnailPanel = ({
   documentId,
-  selectedDocumentId,
-  selectedPageNumber,
   thumbnailWrapperRef,
 }: DocThumbnailPanelProps) => {
+  const selectedDocumentId = useSelector((state: ManualSignReducerRootState) =>
+    selectSignsetsDetailsSelectedDocumentId(state)
+  );
+  const selectedPageNumber = useSelector((state: ManualSignReducerRootState) =>
+    selectSignsetsDetailsSelectedPageNumber(state)
+  );
   const options = {
     cMapUrl: "cmaps/",
     cMapPacked: true,
