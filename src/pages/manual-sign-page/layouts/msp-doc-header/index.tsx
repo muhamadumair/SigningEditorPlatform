@@ -1,4 +1,4 @@
-import { Button, PageHeader, Tag, Modal, Space, Descriptions, } from "antd";
+import { Button, PageHeader, Tag, Modal, Space } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import styled from "styled-components";
 import { FileTextFilled } from "@ant-design/icons";
@@ -17,7 +17,6 @@ import {
   selectDocumentDetailsFileNameByDocId,
   selectDocumentDetailsScale,
   selectDeviceStateIsDesktop,
-  selectDocumentDetailsSigners,
   selectDocumentDetailsSignsetList,
 } from "../../reducer/selectors/documents-details.selector";
 import { useEffect, useState } from "react";
@@ -37,11 +36,9 @@ import { Content } from "antd/lib/layout/layout";
 import { Scalable } from "../../../../models/views/generic.model";
 import { ModalError } from "../../../../commons/modal-error";
 
-const { confirm } = Modal;
-
-interface StyledFileIcon extends Scalable { $isDesktop: boolean }
-interface StyledPageHeader extends Scalable { $isDesktop: boolean }
-interface StyledContent { $isDesktop: boolean }
+interface StyledFileIconProps extends Scalable { $isDesktop: boolean }
+interface StyledPageHeaderProps extends Scalable { $isDesktop: boolean }
+interface StyledContentProps { $isDesktop: boolean }
 
 export const MSPDocHeader = ({
   onClickThumbnail,
@@ -49,9 +46,9 @@ export const MSPDocHeader = ({
   onClickThumbnail: () => void;
 }) => {
   const { t } = useTranslation(["common"]);
-  const [allTextfieldApplied, setAllTextfieldApplied] = useState(false);
-  const [isTextfieldSignsetExist, setIsTextFieldSignsetExist] = useState(false);
-  const [openModalError, setOpenModalError] = useState<any>({ isOpen: false, modalTitle: "", modalDescription: "" });
+  const [, setAllTextfieldApplied] = useState(false);
+  const [isTextfieldSignsetExist] = useState(false);
+  const [openModalError] = useState<any>({ isOpen: false, modalTitle: "", modalDescription: "" });
 
 
   /**
@@ -59,7 +56,6 @@ export const MSPDocHeader = ({
    */
   const selectedDocumentId = useSelector((state: ManualSignReducerRootState) => selectSignsetsDetailsSelectedDocumentId(state));
 
-  const signers = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSigners(state));
   const signsetList = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignsetList(state));
   const fileName = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsFileNameByDocId(state, selectedDocumentId));
   const textFieldSignsets = useSelector(selectAllFieldtypeTextfieldSignsetDetails());
@@ -225,12 +221,12 @@ export const MSPDocHeader = ({
 
 const Wrapper = styled.div``;
 
-const StyledContent = styled(Content) <StyledContent>`
+const StyledContent = styled(Content) <StyledContentProps>`
   display: flex;
   align-content: center;
 `;
 
-const StyledPageHeader = styled(PageHeader) <StyledPageHeader>`
+const StyledPageHeader = styled(PageHeader) <StyledPageHeaderProps>`
   padding: ${SPACE_XS} ${SPACE_MD};
   border-bottom: 1px solid ${G20};
   ${UNABLE_USER_SELECT};
@@ -240,12 +236,7 @@ const StyledPageHeader = styled(PageHeader) <StyledPageHeader>`
   }
 `;
 
-const StyledFileIcon = styled(FileTextFilled) <StyledFileIcon>`
+const StyledFileIcon = styled(FileTextFilled) <StyledFileIconProps>`
   color: ${GOOGLEBLUE};
   font-size: ${(p) => p.$isDesktop ? 22 : 17}px;
-`;
-
-const StyledRightSection = styled.div`
-  display: flex;
-  flex-wrap: wrap;
 `;

@@ -1,7 +1,7 @@
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect } from "react";
 import { documentsDetailsActions } from "../pages/manual-sign-page/reducer/slices/documents-details.slice";
 import { StoreDispatch } from "../store";
 import { useDispatch } from "react-redux";

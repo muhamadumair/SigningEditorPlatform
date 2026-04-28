@@ -1,5 +1,5 @@
 import { DndProviderWrapper } from "../../commons/dnd-provider-wrapper";
-import { Layout, Affix, Tabs } from "antd";
+import { Layout, Affix } from "antd";
 import { MSPDocHeader } from "./layouts/msp-doc-header";
 import styled from "styled-components";
 import { G20, WHITE } from "../../styles/style.constant";
@@ -15,17 +15,14 @@ import {
   selectDocumentDetailsScale,
 } from "./reducer/selectors/documents-details.selector";
 import { MSPSidebar } from "./layouts/msp-sidebar";
-import { useTranslation } from "react-i18next";
 import { Scalable } from "../../models/views/generic.model";
 import { PageRefsProvider } from "../../layouts/doc-workboard/page-refs-context";
 
-interface DocSiteLayout extends Scalable { }
+interface DocSiteLayoutProps extends Scalable { }
 
 export const ManualSignPage = () => {
   const dispatch = useDispatch<StoreDispatch>();
   const pageLayoutRef = useRef<any>(null);
-
-  const { t } = useTranslation(["common"]);
 
   /**
    * initialisation:
@@ -130,7 +127,7 @@ const MainLayout = styled(Layout)`
   background: ${WHITE};
 `;
 
-const DocSiteLayout = styled(Layout) <DocSiteLayout>`
+const DocSiteLayout = styled(Layout) <DocSiteLayoutProps>`
   border-left: 1px solid ${G20};
 
   /* Fixed the height of site-layout */

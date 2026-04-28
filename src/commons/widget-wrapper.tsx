@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { SignSetFieldType } from "../models/views/signset.model";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import { ManualSignReducerRootState } from "../pages/manual-sign-page/reducer";
-import { selectDeviceStateIsDesktop, selectDocumentDetailsSigners, selectDocumentDetailsSignsetList } from "../pages/manual-sign-page/reducer/selectors/documents-details.selector";
+import { selectDeviceStateIsDesktop, selectDocumentDetailsSignsetList } from "../pages/manual-sign-page/reducer/selectors/documents-details.selector";
 
 
 interface WidgetProps {
@@ -24,7 +24,6 @@ interface WrapperProps {
 
 export const WidgetWrapper = ({ type, children, _key, handleChangeActiveWidget }: WidgetProps) => {
 
-  const signers = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSigners(state));
   const signsetList = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignsetList(state));
 
 
@@ -33,7 +32,7 @@ export const WidgetWrapper = ({ type, children, _key, handleChangeActiveWidget }
   );
 
 
-  const [{ isDragging }, drag, preview] = useDrag(
+  const [, drag, preview] = useDrag(
     () => ({
       type,
       item: { type },

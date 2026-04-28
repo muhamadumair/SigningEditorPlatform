@@ -1,10 +1,7 @@
 import { Modal, Space, ModalProps } from "antd";
 import TextArea from "antd/lib/input/TextArea";
-import { ToolOutlined } from "@ant-design/icons";
 import styled from "styled-components";
 import { useTranslation } from "react-i18next";
-import { StoreDispatch } from "../store";
-import { useDispatch } from "react-redux";
 import { MAINBLUE } from "../styles/style.constant";
 
 interface TextFieldModalProps extends ModalProps {

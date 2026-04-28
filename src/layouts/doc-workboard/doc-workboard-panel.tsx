@@ -1,4 +1,4 @@
-import { PageProps, PDFPageProxy, Document, Page, pdfjs } from "react-pdf";
+import { PDFPageProxy, Document, Page } from "react-pdf";
 
 import { useDrop } from "react-dnd";
 import styled from "styled-components";
@@ -18,7 +18,6 @@ import {
 import { signsetsDetailsActions } from "../../pages/manual-sign-page/reducer/slices/signsets-details.slice";
 import { addSignsetDetailsStateFromView } from "../../utils/manual-sign-doc.util";
 import {
-  selectAllSignsetIdsByPageNumAndDocId,
   selectSignsetsDetailsSelectedDocumentId,
   selectSignsetsDetailsSelectedPageNumber,
   selectClickedWidget,
@@ -32,8 +31,6 @@ import {
   selectDocumentDetailsTotalPageNumberByDocId,
   selectIsThumbnailClicked,
   selectDocumentDetailsSignerEmail,
-  selectDocumentDetailsSigners,
-  selectDocumentDetailsBase64SealImage,
   selectDeviceStateWindowDimensions,
   selectDocumentDetailsSignsetList
 } from "../../pages/manual-sign-page/reducer/selectors/documents-details.selector";
@@ -54,9 +51,9 @@ interface DocWrapperProps extends Scalable {
   isLoadError: boolean;
 }
 
-interface PageWrapper extends Scalable { }
+interface PageWrapperProps extends Scalable { }
 
-interface StyledPage extends Scalable {
+interface StyledPageProps extends Scalable {
   isRenderLoading: boolean;
 }
 
@@ -71,7 +68,7 @@ export const DocWorkboardPanel = ({
   const { t } = useTranslation(["common"]);
   const [renderLoading, setRenderLoading] = useState(false);
   const [isLoadError, setIsLoadError] = useState(false);
-  const [pageOrientation, setPageOrientation] = useState<string>("");
+  const [pageOrientation] = useState<string>("");
   const pageWrapperRef = usePageRefs();
   const docWrapperRef = useRef<any>(null);
   const dispatch = useDispatch<StoreDispatch>();
@@ -82,7 +79,7 @@ export const DocWorkboardPanel = ({
 
   //Context Menu
   const [contextMenuVisible, setContextMenuVisible] = useState(false);
-  const [contextItemExist, setContextItemExist] = useState<boolean>(true);
+  const [contextItemExist] = useState<boolean>(true);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ top: number; left: number }>({
     top: 0,
     left: 0,
@@ -127,7 +124,6 @@ export const DocWorkboardPanel = ({
 
   const selectedClickedWidget = useSelector((state: ManualSignReducerRootState) => selectClickedWidget(state));
 
-  const allSignsetIdsByPageNum = useSelector(selectAllSignsetIdsByPageNumAndDocId(selectedPageNumber, selectedDocumentId));
   const allSignsetDetails = useSelector((state: ManualSignReducerRootState) => selectAllSignsetDetails(state));
 
 
@@ -135,9 +131,6 @@ export const DocWorkboardPanel = ({
     selectDeviceStateWindowDimensions(state)
   );
 
-  const base64SealImage = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsBase64SealImage(state));
-
-  const signers = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSigners(state));
   const signsetList = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignsetList(state));
 
 
@@ -305,7 +298,7 @@ export const DocWorkboardPanel = ({
     dispatch(signsetsDetailsActions.unselectSelectedSignsetId(""));
   };
 
-  const [_, dropping] = useDrop(
+  const [, dropping] = useDrop(
     () => ({
       accept: SignSetFieldTypeArray,
       drop: (item: { type: SignSetFieldType }, monitor) => {
@@ -597,32 +590,31 @@ export const DocWorkboardPanel = ({
               >
                 {showAllWidgets.length !== 0 &&
                   showAllWidgets.map((ids: any) => {
-                    if (ids.pageIndex === pageNumber) {
-                      const resizableStyleCreator: React.CSSProperties = {
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        transformOrigin: "0 0",
-                        transform: `translate(${ids.left}px, ${ids.top}px)`,
-                        zIndex: 99,
-                        background: signerEmail !== ids.signerEmail ? "#d9dfe4" : isOverlappedWidget(ids.id) ? "#FF8A8A" : "#a6d1ff",
-                        opacity: signerEmail !== ids.signerEmail ? 0.8
-                          : isOverlappedWidget(ids.id) ? 0.5 : 0.8,
-                        borderRadius: "5px",
-                      }
+                    if (ids.pageIndex !== pageNumber) return null;
 
-                      return <DraggableWrapper
-                        id={ids.id}
-                        key={ids.id}
-                        pageIndex={pageNumber}
-                        resizableStyleCreator={resizableStyleCreator}
-                        disableWidget={signerEmail !== ids.signerEmail}
-                        onSetAllWidgets={onSetAllWidgets}
-                        onSetDisableWidget={onSetDisableWidget}
-                      />
-                    }
-                  }
-                  )}
+                    const resizableStyleCreator: React.CSSProperties = {
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      transformOrigin: "0 0",
+                      transform: `translate(${ids.left}px, ${ids.top}px)`,
+                      zIndex: 99,
+                      background: signerEmail !== ids.signerEmail ? "#d9dfe4" : isOverlappedWidget(ids.id) ? "#FF8A8A" : "#a6d1ff",
+                      opacity: signerEmail !== ids.signerEmail ? 0.8
+                        : isOverlappedWidget(ids.id) ? 0.5 : 0.8,
+                      borderRadius: "5px",
+                    };
+
+                    return <DraggableWrapper
+                      id={ids.id}
+                      key={ids.id}
+                      pageIndex={pageNumber}
+                      resizableStyleCreator={resizableStyleCreator}
+                      disableWidget={signerEmail !== ids.signerEmail}
+                      onSetAllWidgets={onSetAllWidgets}
+                      onSetDisableWidget={onSetDisableWidget}
+                    />;
+                  })}
                 <StyledPage
                   key={`page_${pageNumber}`}
                   pageNumber={pageNumber}
@@ -651,9 +643,9 @@ const StyledSpin = styled(Spin)`
   margin: auto 0;
 `;
 
-const StyledPage = styled(Page) <StyledPage>``;
+const StyledPage = styled(Page) <StyledPageProps>``;
 
-const PageWrapper = styled.div<PageWrapper>`
+const PageWrapper = styled.div<PageWrapperProps>`
   /*ensure parent follow child's width & height */
   display: inline-block;
 

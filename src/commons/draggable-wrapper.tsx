@@ -22,30 +22,24 @@ import {
   selectDocumentDetailsScale,
   selectDocumentDetailsBase64SealImage,
   selectDocumentDetailsBase64SignatureImage,
-  selectDocumentDetailsBase64SignatureDraw,
-  selectDocumentDetailsIsSignCanvas,
   selectDocumentDetailsTransparent,
   selectDocumentDetailsSignerEmail,
-  selectDeviceStateIsDesktop
 } from "../pages/manual-sign-page/reducer/selectors/documents-details.selector";
 import {
-  WHITE,
   FONT_BODY,
   LIGHT_BORDER,
   ACTIVE_BORDER,
-  BLACK,
   RED,
 } from "../styles/style.constant";
 import { Scalable } from "../models/views/generic.model";
 import { TextFieldModal } from "../components/text-field-modal";
-import { CircleDeleteButton } from "./circle-delete-button";
 import { MSPDocWorkboardWidget } from "../pages/manual-sign-page/components/msp-doc-workboard-widget";
 import { Resizable } from "re-resizable";
 import { usePageRefs } from "../layouts/doc-workboard/page-refs-context";
 import { Button } from "antd";
 import { DeleteFilled } from "@ant-design/icons";
 
-interface DraggableWrapper {
+interface DraggableWrapperProps {
   id: any;
   pageIndex: number;
   resizableStyleCreator: React.CSSProperties;
@@ -87,16 +81,12 @@ interface ChildWrapperProps extends Scalable, IsSelectedWidgetProps {
  *
  */
 
-export const DraggableWrapper = ({ id, pageIndex, resizableStyleCreator, disableWidget, onSetAllWidgets, onSetDisableWidget }: DraggableWrapper) => {
+export const DraggableWrapper = ({ id, pageIndex, resizableStyleCreator, disableWidget, onSetAllWidgets, onSetDisableWidget }: DraggableWrapperProps) => {
   const dispatch = useDispatch<StoreDispatch>();
   const pageWrapperRef = usePageRefs();
 
   const signerEmail = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignerEmail(state));
 
-  const isDesktop = useSelector((state: ManualSignReducerRootState) =>
-    selectDeviceStateIsDesktop(state)
-  );
-  // need to remove these
   const oneSignsetDetails = useSelector((state: ManualSignReducerRootState) =>
     selectSignsetsDetailsById(state, id)
   );
@@ -150,7 +140,7 @@ export const DraggableWrapper = ({ id, pageIndex, resizableStyleCreator, disable
   const [widgetList, setWidgetList] = useState<any[]>([]);
   //const [disableWidget, setDisableWidget] = useState(false);
   const [acknowledgeReason, setAcknowledgeReason] = useState(false);
-  const [warningSentence, setWarningSentence] = useState<string>("")
+  const [warningSentence] = useState<string>("")
 
 
   // State to keep track of previous touch Y position
@@ -421,7 +411,7 @@ export const DraggableWrapper = ({ id, pageIndex, resizableStyleCreator, disable
   const textfieldParentRef = useRef<any>();
 
   const [isTextFieldModalOpen, setIsTextFieldModalOpen] = useState<boolean>(false);
-  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState<boolean>(false);
+  const [, setIsSignatureModalOpen] = useState<boolean>(false);
 
   const [textFieldValue, setTextFieldValue] = useState<string>("");
   const [reasonValue, setReasonValue] = useState<string>("");
@@ -509,10 +499,6 @@ export const DraggableWrapper = ({ id, pageIndex, resizableStyleCreator, disable
     if ((oneSignsetDetails?.fieldType! === "textfield" || oneSignsetDetails?.fieldType! === "sign")) {
       onWidgetClick();
     }
-  };
-
-  const showDeleteButton = () => {
-    return isSelectedWidget;
   };
 
   const signatureSrc = () => {

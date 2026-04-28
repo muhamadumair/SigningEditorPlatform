@@ -2,13 +2,11 @@ import styled from "styled-components";
 import {
   WHITE,
   G20,
-  G70,
   SPACE_XS,
   UNABLE_USER_SELECT,
-  MAINBLUE,
   SPACE_MD,
 } from "../styles/style.constant";
-import { Space, Divider, Slider, Pagination, Button } from "antd";
+import { Space, Pagination, Button } from "antd";
 import { ZoomInOutlined, ZoomOutOutlined } from "@ant-design/icons";
 import { PageScaleDropdown } from "./page-scale-dropdown";
 import { ThumbnailButton } from "../commons/thumbnail-button";
@@ -19,8 +17,6 @@ import { ManualSignReducerRootState } from "../pages/manual-sign-page/reducer";
 import { signsetsDetailsActions } from "../pages/manual-sign-page/reducer/slices/signsets-details.slice";
 import { selectSignsetsDetailsSelectedDocumentId, selectSignsetsDetailsSelectedPageNumber } from "../pages/manual-sign-page/reducer/selectors/signsets-details.selector";
 import { documentsDetailsActions } from "../pages/manual-sign-page/reducer/slices/documents-details.slice";
-import { Scalable } from "../models/views/generic.model";
-
 interface DocHeaderToolbarProps {
   showZoomDropdown?: boolean;
   showZoomSlider?: boolean;
@@ -32,8 +28,7 @@ interface DocHeaderToolbarProps {
   setScale?: (value: number) => void;
 }
 
-interface StyledSlider extends Scalable { isDesktop: boolean; }
-interface LeftSection { isDesktop: boolean; }
+interface LeftSectionProps { isDesktop: boolean; }
 
 export const DocHeaderToolbar = ({
   showThumbnailButton = true,
@@ -131,7 +126,7 @@ const Wrapper = styled.div`
   ${UNABLE_USER_SELECT}
 `;
 
-const LeftSection = styled.div<LeftSection>`
+const LeftSection = styled.div<LeftSectionProps>`
   display: ${(p) => p.isDesktop ? "flex" : "block"};
 `;
 const MiddleSection = styled.div`
@@ -140,19 +135,3 @@ const MiddleSection = styled.div`
   margin-right: 350px
 `;
 const RightSection = styled.div``;
-
-const StyledDivider = styled(Divider)`
-  color: ${G70};
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
-`;
-
-const StyledSlider = styled(Slider) <StyledSlider>`
-  width: ${(p) => p.isDesktop ? 160 : 130}px;
-  .ant-slider-track {
-    background-color: ${MAINBLUE};
-  }
-
-  &:hover .ant-slider-track {
-    background-color: #1890ff;
-  }
-`;

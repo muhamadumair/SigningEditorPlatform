@@ -61,19 +61,6 @@ const Icon = styled.div`
   transition: all 0.2s;
 `;
 
-const Title = styled.h4`
-  display: -webkit-box;
-  height: 44px;
-  max-width: 100%;
-  overflow: hidden;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-
-  /*over-ride default h4 */
-  margin-bottom: 2px;
-  color: inherit;
-`;
-
 const Descriptions = styled.div`
   color: ${G60};
   white-space: nowrap;

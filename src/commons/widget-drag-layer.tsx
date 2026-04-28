@@ -3,12 +3,9 @@ import styled from "styled-components";
 import { SignSetFieldTypeIconKeys, SignSetDimensionValues } from "../models/views/signset.model";
 import { Scalable } from "../models/views/generic.model";
 import { WidgetIconBox } from "./widget-icon-box";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { StoreDispatch } from "../store";
 import { signsetsDetailsActions } from "../pages/manual-sign-page/reducer/slices/signsets-details.slice";
-import { useEffect, useState } from "react";
-import { ManualSignReducerRootState } from "../pages/manual-sign-page/reducer";
-import { selectDocumentDetailsBase64SealImage } from "../pages/manual-sign-page/reducer/selectors/documents-details.selector";
 
 const getItemStyles = (
   initialSourceOffset: any,
@@ -32,7 +29,6 @@ const getItemStyles = (
 };
 
 export const WidgetDragLayer = ({ scale }: Scalable) => {
-  const base64SealImage = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsBase64SealImage(state));
   const dispatch = useDispatch<StoreDispatch>();
 
   const renderItem = () => {
@@ -50,7 +46,6 @@ export const WidgetDragLayer = ({ scale }: Scalable) => {
   const {
     itemType,
     isDragging,
-    item,
     initialSourceOffset,
     currentSourceOffset,
     currentClientOffset,

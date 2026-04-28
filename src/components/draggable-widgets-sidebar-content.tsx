@@ -1,5 +1,5 @@
-import { List, Select, Radio, Input, Button, Space, Tooltip } from "antd";
-import { CloseCircleTwoTone, PlusOutlined, CheckCircleTwoTone, DeleteTwoTone } from "@ant-design/icons";
+import { List, Input, Button, Tooltip } from "antd";
+import { PlusOutlined, DeleteTwoTone } from "@ant-design/icons";
 import { WidgetWrapper } from "../commons/widget-wrapper";
 import styled from "styled-components";
 import {
@@ -16,15 +16,14 @@ import {
 import { SidebarListTitle } from "./sidebar-list-title";
 import { ScTooltip } from "../commons/sc-tooltip";
 import { Collapsable, ActivatedWidget } from "../models/views/generic.model";
-import { useTranslation } from "react-i18next";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { StoreDispatch } from "../store";
 import { ManualSignReducerRootState } from "../pages/manual-sign-page/reducer";
-import { selectAllSignsetDetails, selectClickedWidget, selectSignsetsDetailsSelectedDocumentId } from "../pages/manual-sign-page/reducer/selectors/signsets-details.selector";
+import { selectAllSignsetDetails, selectClickedWidget } from "../pages/manual-sign-page/reducer/selectors/signsets-details.selector";
 import { signsetsDetailsActions } from "../pages/manual-sign-page/reducer/slices/signsets-details.slice";
 import { documentsDetailsActions } from "../pages/manual-sign-page/reducer/slices/documents-details.slice";
-import { selectDocumentDetailsSignerEmail, selectDocumentDetailsSigners, selectDocumentDetailsSignsetList } from "../pages/manual-sign-page/reducer/selectors/documents-details.selector";
+import { selectDocumentDetailsSignerEmail, selectDocumentDetailsSignsetList } from "../pages/manual-sign-page/reducer/selectors/documents-details.selector";
 import { reactLibraryFormatter } from "../utils/manual-sign-doc.util";
 import isEmail from 'email-validator';
 
@@ -32,7 +31,7 @@ interface SidebarContentProps extends Collapsable {
   widgetListData?: any[];
 }
 
-interface Wrapper extends ActivatedWidget {
+interface WrapperProps extends ActivatedWidget {
   collapsed: boolean;
   signsetList: any;
 }
@@ -42,7 +41,6 @@ export const DraggableWidgetsSidebarContent = ({
   widgetListData = [],
 }: SidebarContentProps) => {
   const dispatch = useDispatch<StoreDispatch>();
-  const signers = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSigners(state));
   const signsetList = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignsetList(state));
   const selectedClickedWidget = useSelector((state: ManualSignReducerRootState) => selectClickedWidget(state));
   const signerEmail = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignerEmail(state));
@@ -66,11 +64,6 @@ export const DraggableWidgetsSidebarContent = ({
     const updatedSelectedActiveWidget = { ...selectedActiveWidget, active: true };
     setActiveWidget(updatedSelectedActiveWidget);
     setWidgetType(type);
-  }
-
-  const handleChangeSigner = (event: any) => {
-    const email = collapsed ? event : event.target.value;
-    dispatch(documentsDetailsActions.setSignerEmail(email)); // Set the index of signer
   }
 
   const hasDuplicateEmail = (list: any, email: any) => {
@@ -450,7 +443,7 @@ export const DraggableWidgetsSidebarContent = ({
   );
 };
 
-const Wrapper = styled.div<Wrapper>`
+const Wrapper = styled.div<WrapperProps>`
 width: ${(p) => p.collapsed ? "none" : "230px"};
 padding-left: ${(p) => p.collapsed ? "none" : "10px"};
 border-top: 1px groove;

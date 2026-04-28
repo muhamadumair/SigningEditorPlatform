@@ -3,7 +3,7 @@ import {
   createEntityAdapter,
   PayloadAction,
 } from "@reduxjs/toolkit";
-import { SignSetState, SignSetFieldTypeArray } from "../../../../models/views/signset.model";
+import { SignSetState } from "../../../../models/views/signset.model";
 import undoable, { groupByActionTypes, includeAction } from "redux-undo";
 
 export const signsetsDetailsAdapter = createEntityAdapter<SignSetState>();

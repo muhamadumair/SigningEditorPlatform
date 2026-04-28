@@ -2,9 +2,7 @@
 import { Document, Page } from "react-pdf";
 import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
-import { RightSquareFilled } from "@ant-design/icons";
 import {
-  DEFAULT_BORDER_STYLE,
   LIGHTBLUE,
   MAINBLUE,
   SPACE_MD,
@@ -15,7 +13,6 @@ import { PDFPageProxy } from "react-pdf";
 import { useDispatch, useSelector } from "react-redux";
 import { ManualSignReducerRootState } from "../pages/manual-sign-page/reducer";
 import {
-  selectAllSignsetDetails,
   selectSignsetsDetailsSelectedDocumentId,
   selectSignsetsDetailsSelectedPageNumber,
 } from "../pages/manual-sign-page/reducer/selectors/signsets-details.selector";

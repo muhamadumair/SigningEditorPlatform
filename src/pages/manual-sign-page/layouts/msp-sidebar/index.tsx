@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { PageHeader } from "antd";
-import { FileTextFilled } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { DraggableWidgetsSidebarContent } from "../../../../components/draggable-widgets-sidebar-content";
@@ -16,18 +14,6 @@ import {
   selectDeviceStateIsDesktop,
 } from "../../reducer/selectors/documents-details.selector";
 import { selectClickedWidget } from "../../reducer/selectors/signsets-details.selector";
-import { G20, GOOGLEBLUE, SPACE_MD, SPACE_XS, UNABLE_USER_SELECT, WHITE } from "../../../../styles/style.constant";
-import styled from "styled-components";
-import { Content } from "antd/lib/layout/layout";
-import { Scalable } from "../../../../models/views/generic.model";
-
-interface StyledFileIcon extends Scalable { isDesktop: boolean }
-interface StyledPageHeader extends Scalable { isDesktop: boolean }
-interface StyledContent { isDesktop: boolean }
-
-interface Wrapper {
-  collapsed: boolean;
-}
 
 
 export const MSPSidebar = () => {
@@ -120,27 +106,3 @@ export const MSPSidebar = () => {
   );
 };
 
-const StyledFileIcon = styled(FileTextFilled) <StyledFileIcon>`
-  color: ${GOOGLEBLUE};
-  font-size: ${(p) => p.isDesktop ? 22 : 17}px;
-`;
-
-const StyledPageHeader = styled(PageHeader) <StyledPageHeader>`
-  padding: ${SPACE_XS} ${SPACE_MD};
-  border-bottom: 1px solid ${G20};
-  ${UNABLE_USER_SELECT};
-
-  .ant-page-header-heading-title {
-    font-size: ${(p) => p.isDesktop ? 20 : 15}px;
-  }
-`;
-const StyledContent = styled(Content) <StyledContent>`
-  display: flex;
-  align-content: center;
-`;
-
-const Wrapper = styled.div<Wrapper>`
-width: ${(p) => p.collapsed ? "none" : "230px"};
-padding-left: ${(p) => p.collapsed ? "none" : "10px"};
-border-top: 1px groove;
-`

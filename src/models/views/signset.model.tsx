@@ -1,5 +1,5 @@
 import { strEnumType } from "../../utils";
-import Icon, {
+import {
   CalendarOutlined,
   EditOutlined,
   FontSizeOutlined,
@@ -7,10 +7,7 @@ import Icon, {
 } from "@ant-design/icons";
 import {
   GENERIC_MIN_WIDTH_HEIGHT,
-  SEAL_IMAGE_HEIGHT,
-  SEAL_IMAGE_WIDTH,
   SIGN_DATE_HEIGHT,
-  SIGN_DATE_MIN_WIDTH,
   SIGN_DATE_WIDTH,
   TEXT_FIELD_MIN_HEIGHT,
   TEXT_FIELD_MIN_WIDTH,

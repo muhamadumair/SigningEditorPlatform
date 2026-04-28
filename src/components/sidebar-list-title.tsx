@@ -4,7 +4,7 @@ import { ScTooltip } from "../commons/sc-tooltip";
 import { InfoCircleOutlined, WarningTwoTone } from "@ant-design/icons";
 import { SPACE_SM, UNABLE_USER_SELECT, BLACK, SPACE, MAINBLUE } from "../styles/style.constant";
 import { Collapsable } from "../models/views/generic.model";
-import { selectDocumentDetailsSigners, selectDocumentDetailsSignsetList } from "../pages/manual-sign-page/reducer/selectors/documents-details.selector";
+import { selectDocumentDetailsSignsetList } from "../pages/manual-sign-page/reducer/selectors/documents-details.selector";
 import { ManualSignReducerRootState } from "../pages/manual-sign-page/reducer";
 import { useSelector } from "react-redux";
 
@@ -21,7 +21,6 @@ export const SidebarListTitle = ({
   title,
   tooltipDescription = "",
 }: Props) => {
-  const signers = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSigners(state));
   const signsetList = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignsetList(state));
 
 

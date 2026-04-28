@@ -3,15 +3,10 @@ import styled from "styled-components";
 import { CssValueType, Scalable } from "../models/views/generic.model";
 import {
   DISABLE_TRANSITION,
-  SCBLUE,
   WHITE,
   FONT_BODY,
   MAINBLUE,
 } from "../styles/style.constant";
-import { useTranslation } from "react-i18next";
-import {
-  EditOutlined,
-} from "@ant-design/icons";
 
 interface IsSelectedWidgetProps {
   isselectedwidget: boolean;

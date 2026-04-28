@@ -36,7 +36,7 @@ export const MSPImageWidget = ({
     selectDocumentDetailsAllSealApplied(state)
   );
 
-  const [isAllApplied, setIsAllApplied] = useState<boolean>(false);
+  const [, setIsAllApplied] = useState<boolean>(false);
 
   useEffect(() => {
     if (fieldType === "sign") {

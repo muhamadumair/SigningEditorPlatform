@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import { Scalable } from "../models/views/generic.model";
 import { SignSetDimension } from "../models/views/signset.model";
-import { useState } from "react";
 
 export interface ImageBasedWidgetProps extends SignSetDimension, Scalable {
   src?: string;

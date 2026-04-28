@@ -13,8 +13,6 @@ import { selectAllSignsetDetails } from "../pages/manual-sign-page/reducer/selec
 import { ManualSignReducerRootState } from "../pages/manual-sign-page/reducer";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { selectDocumentDetailsSignsetList } from "../pages/manual-sign-page/reducer/selectors/documents-details.selector";
-
 interface SidebarActionProgressProps extends Collapsable {
   title?: string;
   isSuccess?: boolean;
@@ -34,7 +32,6 @@ export const SidebarActionProgress = ({
   const [textFieldCount, setTextFieldCount] = useState(0);
 
   const allSignsetDetails = useSelector((state: ManualSignReducerRootState) => selectAllSignsetDetails(state));
-  const signsetList = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignsetList(state));
 
 
 

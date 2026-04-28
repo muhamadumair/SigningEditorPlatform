@@ -6,7 +6,6 @@ import { ManualSignReducerRootState } from "../reducer";
 import {
   selectDocumentDetailsAllSealApplied,
   selectDocumentDetailsAllSignatureApplied,
-  selectDocumentDetailsSignsetList,
 } from "../reducer/selectors/documents-details.selector";
 import { Collapsable } from "../../../models/views/generic.model";
 import { selectAllFieldtypeTextfieldSignsetDetails, selectAllSignsetDetails } from "../reducer/selectors/signsets-details.selector";
@@ -36,7 +35,6 @@ export const MSPCoordinateSignSidebarContent = ({ collapsed }: Collapsable) => {
   const allSignsetDetails = useSelector((state: ManualSignReducerRootState) =>
     selectAllSignsetDetails(state)
   );
-  const signsetList = useSelector((state: ManualSignReducerRootState) => selectDocumentDetailsSignsetList(state));
 
 
   useEffect(() => {
