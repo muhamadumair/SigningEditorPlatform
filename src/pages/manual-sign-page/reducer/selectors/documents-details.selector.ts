@@ -4,34 +4,14 @@ import { ManualSignReducerRootState } from "..";
 const documentsDetailsState = (state: ManualSignReducerRootState) =>
   state.manualSign.documentsDetails;
 
-export const selectDocumentDetailsAccessCode = createSelector(
-  [documentsDetailsState],
-  (documentsDetails) => documentsDetails.accessCode
-);
-
-export const selectDocumentDetailsAddresseeId = createSelector(
-  [documentsDetailsState],
-  (documentsDetails) => documentsDetails.addressseeId
-);
-
 export const selectDocumentDetailsSignerEmail = createSelector(
   [documentsDetailsState],
   (documentsDetails) => documentsDetails.signerEmail
 );
 
-export const selectDocumentDetailsSigners = createSelector(
-  [documentsDetailsState],
-  (documentsDetails) => documentsDetails.signers
-);
-
 export const selectDocumentDetailsSignsetList = createSelector(
   [documentsDetailsState],
   (documentsDetails) => documentsDetails.signsetList
-);
-
-export const selectDocumentDetailsContractId = createSelector(
-  [documentsDetailsState],
-  (documentsDetails) => documentsDetails.contractId
 );
 
 export const selectDocumentDetailsScale = createSelector(
