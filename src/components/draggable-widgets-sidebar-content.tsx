@@ -82,34 +82,6 @@ export const DraggableWidgetsSidebarContent = ({
 
   }
 
-  // useEffect(() => {
-  //   if (signers.length !== 0) {
-  //     const allSignset = reactLibraryFormatter({ signsets: allSignsetDetails });
-  //     let resultArrays = signers.map((signer: any) => {
-  //       const matchingSignsets = allSignset.filter((item) => item.email === signer);
-  //       return {
-  //         email: signer,
-  //         signset: matchingSignsets, // Update signset with an array of matching signsets
-  //       };
-  //     });
-
-  //     // Remove the 'email' property from the 'signset' objects
-  //     resultArrays.forEach((item: any) => {
-  //       item.signset.forEach((signsetItem: any) => {
-  //         signsetItem.top = Math.round(signsetItem.top);
-  //         signsetItem.left = Math.round(signsetItem.left);
-  //         delete signsetItem.email;
-  //       });
-  //     });
-
-  //   }
-  //   else {
-  //     setAddSigner(true);
-  //   }
-
-  // }, [signers])
-
-
   useEffect(() => {
     if (signsetList.length !== 0) {
       const allSignset = reactLibraryFormatter({ signsets: allSignsetDetails });
@@ -136,35 +108,6 @@ export const DraggableWidgetsSidebarContent = ({
     }
 
   }, [signsetList])
-
-  // const handleAddSigner = () => {
-  //   const isValid = isEmail.validate(email);
-
-  //   if (isValid) {
-  //     setIsValidEmail(true);
-  //     setOnSubmit(true);
-  //     setIsDuplicateEmail(false);
-  //     setCurrentSignerList((prevSignerList) => {
-  //       if (hasDuplicateEmail(prevSignerList, email)) {
-  //         setIsDuplicateEmail(true);
-  //         // You may want to handle the duplicate email case differently (e.g., show an error message).
-  //       } else {
-  //         const updatedSignerList = [...prevSignerList, { value: email, label: email }];
-  //         const changeSignerListFormat = updatedSignerList.map((signer) => signer.value);
-  //         dispatch(documentsDetailsActions.setSigners(changeSignerListFormat));
-  //         setEmail('');
-  //         setAddSigner(false);
-  //       }
-  //       return prevSignerList;
-  //     });
-
-  //   }
-  //   else {
-  //     setIsValidEmail(false);
-  //     setIsDuplicateEmail(false);
-  //     setOnSubmit(true);
-  //   }
-  // }
 
   const handleAddSigner = () => {
     const isValid = isEmail.validate(email);
