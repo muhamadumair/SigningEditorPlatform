@@ -8,20 +8,11 @@ export const fetchManualSignDocument = createAsyncThunk(
   "manualSign/fetchManualSignDocument",
   async (_, { getState, dispatch }: { getState: () => any; dispatch: any }) => {
     const initialState = window.__INITIAL_STATE__ || {};
-    const accessCode = initialState.accesscode;
-    const contractId = initialState.contractid;
-    const addresseeId = initialState.addresseeid;
     const contractName = initialState.contractname;
 
     // DISPATCH SECTION:
-    dispatch(documentsDetailsActions.setAccessCode(accessCode));
-    dispatch(documentsDetailsActions.setAddresseeId(addresseeId));
-    dispatch(documentsDetailsActions.setContractId(contractId));
-
     // REACT DOCUMENT CREATOR D&D LIBRARY:
     console.log("Displaying Editor version in localhost");
-    //const signers = initialState.signers;
-    //dispatch(documentsDetailsActions.setSigners(signers))
 
     const signsetList = initialState.signsetList ?? [];
     dispatch(documentsDetailsActions.setSignsetList(signsetList));

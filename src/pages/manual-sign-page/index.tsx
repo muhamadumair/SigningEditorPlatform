@@ -35,27 +35,16 @@ export const ManualSignPage = () => {
     window.__INITIAL_STATE__ = {
       contractname: window.__INITIAL_STATE__.contractName, // (param)
       base64Pdf: window.__INITIAL_STATE__.base64Pdf, // (param)
-      //signers: window.__INITIAL_STATE__.signers,
       signsetList: window.__INITIAL_STATE__.signsetList,
-      accesscode: "F9B40675C931220E851638325ED60881AF798AA53CF83B0ABF3825E73940FA72", //contractNumber
-      contractid: "10921", // not required (fixed value)
-      addresseeid: "21720", // not required (fixed value)
-      email: "-funny@yopmail.com", // not required (fixed value)
-      fromPage: "integratorsign", // follow integratorsign interface (fixed value)
       contractInfoState: "1", // 1 for pending sign (fixed value)
-      addresseeHasLogo: "0", // 1, no logo (fixed value)
-      addresseeAuthType: "0", // 0, no otp (fixed value)
       addresseeSignState: "9", // (fixed value)
       addresseeHasTextfield: "0", // 0, show textfield (fixed value)
-      addresseeHasSigndate: "0", // 0, show signdate (fixed value)
       addresseeHasSealImage: "0", // 0, show seal (fixed value)
       addresseeHasSignImage: "0", // 0, show sign (fixed value)
-      //totalPages: 0,
-      basePath: "./"
     };
 
 
-    console.log("window.__INITIAL_STATE__ 1 :", window.__INITIAL_STATE__);
+    console.log("window.__INITIAL_STATE__ :", window.__INITIAL_STATE__);
     dispatch(fetchManualSignDocument());
   }, []);
 

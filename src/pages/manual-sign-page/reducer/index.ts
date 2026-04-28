@@ -33,9 +33,6 @@ export interface ManualSignReducerRootState {
     documentsDetails: EntityState<documentDetailsState> & {
       scale: number;
       allLoaded: boolean;
-      accessCode: string;
-      addressseeId: string;
-      contractId: string;
       allSignatureApplied: boolean;
       allSealApplied: boolean;
       base64SignatureImage: string;
@@ -49,7 +46,6 @@ export interface ManualSignReducerRootState {
       isDesktop: boolean;
       isThumbnailClicked: boolean;
       signerEmail: string;
-      signers: any;
       signsetList: any;
     };
   };

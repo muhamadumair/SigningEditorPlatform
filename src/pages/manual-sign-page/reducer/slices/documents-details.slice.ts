@@ -13,9 +13,6 @@ export const multiDocDetailsAdapter = createEntityAdapter<
 const initialState = multiDocDetailsAdapter.getInitialState({
   scale: 1,
   allLoaded: false,
-  accessCode: "", // might change in future for sign server v2 api
-  addressseeId: "", // might change in future for sign server v2 api
-  contractId: "", // might change in future for sign server v2 api
   allSignatureApplied: false,
   allSealApplied: false,
   base64SignatureImage: "",
@@ -29,7 +26,6 @@ const initialState = multiDocDetailsAdapter.getInitialState({
   isDesktop: true,
   isThumbnailClicked: false,
   signerEmail: "",
-  signers: [],
   signsetList: []
 });
 
@@ -48,17 +44,8 @@ export const documentsDetailsSlice = createSlice({
       });
       state.allLoaded = true;
     },
-    setAccessCode(state, action) {
-      state.accessCode = action.payload;
-    },
-    setAddresseeId(state, action) {
-      state.addressseeId = action.payload;
-    },
     setSignerEmail(state, action) {
       state.signerEmail = action.payload;
-    },
-    setSigners(state, action) {
-      state.signers = action.payload;
     },
     setSignsetList(state, action) {
       state.signsetList = action.payload;
@@ -71,9 +58,6 @@ export const documentsDetailsSlice = createSlice({
     },
     setIsThumbnailClicked(state, action) {
       state.isThumbnailClicked = action.payload;
-    },
-    setContractId(state, action) {
-      state.contractId = action.payload;
     },
     setScale(state, action) {
       state.scale = action.payload;
