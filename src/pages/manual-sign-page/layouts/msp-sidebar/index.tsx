@@ -85,7 +85,7 @@ export const MSPSidebar = () => {
       }
     );
     return list;
-  }, [localStorage.getItem("i18nextLng")]);
+  }, [t]);
 
 
   return (
